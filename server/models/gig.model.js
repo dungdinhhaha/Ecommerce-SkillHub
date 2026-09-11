@@ -7,6 +7,17 @@ const GigModel = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    listingType: {
+      type: String,
+      enum: ["skill_service", "digital_product"],
+      default: "skill_service",
+    },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    rejectionReason: { type: String, default: "" },
     title: { type: String, required: true },
     description: { type: String, required: true },
     totalStars: { type: Number, default: 0 },
@@ -21,6 +32,8 @@ const GigModel = new mongoose.Schema(
     revisionNumber: { type: Number, required: true },
     features: { type: [String], required: false },
     sales: { type: Number, default: 0 },
+    digitalFileUrl: { type: String, default: "" },
+    digitalFileName: { type: String, default: "" },
   },
   {
     timestamps: true,

@@ -38,6 +38,24 @@ const UserModel = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    accountStatus: {
+      type: String,
+      enum: ["active", "blocked"],
+      default: "active",
+    },
+    totalEarned: {
+      type: Number,
+      default: 0,
+    },
+    legalConsent: {
+      termsAcceptedAt: { type: Date, default: null },
+      privacyAcceptedAt: { type: Date, default: null },
+      version: { type: String, default: "2026-09" },
+    },
   },
   {
     timestamps: true,
@@ -45,6 +63,7 @@ const UserModel = new mongoose.Schema(
 );
 
 UserModel.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
   const hashedPass = await bcrypt.hash(this.password, 10);
   this.password = hashedPass;
   next();
@@ -56,8 +75,9 @@ UserModel.methods.isPasswordMatch = async function (password) {
 
 UserModel.methods.getSignToken = function () {
   return jwt.sign(
-    { id: this._id, isSeller: this.isSeller },
-    process.env.JWT_SECRET
+    { id: this._id, isSeller: this.isSeller, isAdmin: this.isAdmin },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRE || "7d" }
   );
 };
 

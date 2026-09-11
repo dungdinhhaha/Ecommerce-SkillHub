@@ -11,6 +11,9 @@ export const INIT_STATE = {
   revisionNumber: 0,
   features: [],
   price: 0,
+  listingType: "skill_service",
+  digitalFileUrl: "",
+  digitalFileName: "",
 };
 
 export const gigReducer = (state, action) => {
@@ -25,8 +28,11 @@ export const gigReducer = (state, action) => {
         ...state,
         cover: action.payload.cover,
         images: action.payload.images,
+        digitalFileUrl: action.payload.digitalFileUrl || state.digitalFileUrl,
+        digitalFileName: action.payload.digitalFileName || state.digitalFileName,
       };
     case "ADD_FEATURE":
+      if (!action.payload || state.features.includes(action.payload)) return state;
       return { ...state, features: [...state.features, action.payload] };
     case "REMOVE_FEATURE":
       return {

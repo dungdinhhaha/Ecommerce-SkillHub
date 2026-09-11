@@ -1,0 +1,29 @@
+.earnings { display: flex; justify-content: center; min-height: 75vh; background: linear-gradient(180deg, #fff, #f7faf9); }
+.earnings .container { width: min(1200px, calc(100% - 32px)); padding: 46px 0 70px; }
+.earnings .title { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; padding: 24px; border: 1px solid var(--sh-border); border-radius: 24px; background: white; box-shadow: var(--sh-shadow-soft); }
+.earnings .title h1 { margin: 10px 0 6px; font-size: clamp(32px, 5vw, 52px); letter-spacing: -.05em; }
+.earnings .title p { color: var(--sh-muted); line-height: 1.55; }
+.earnings .title a { color: var(--sh-primary-dark); font-weight: 800; text-decoration: none; background: #ecfdf5; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 999px; }
+.earning-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+.earning-summary article { border: 1px solid var(--sh-border); border-radius: 18px; padding: 18px; background: white; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--sh-shadow-soft); }
+.earning-summary small, .earning-summary span { color: var(--sh-muted); line-height: 1.45; }
+.earning-summary strong { font-size: 24px; color: var(--sh-primary-dark); overflow-wrap: anywhere; }
+.earning-list { display: grid; gap: 14px; }
+.earning-card { border: 1px solid var(--sh-border); border-radius: 18px; padding: 15px; display: flex; align-items: center; gap: 14px; background: white; box-shadow: var(--sh-shadow-soft); }
+.earning-card img { width: 96px; height: 70px; object-fit: cover; border-radius: 14px; }
+.earning-card p { margin: 6px 0; color: #555; }
+.earning-card small { color: var(--sh-muted); overflow-wrap: anywhere; }
+.earning-card strong { overflow-wrap: anywhere; }
+.earning-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 170px; }
+.earning-right .status { font-weight: 800; }
+
+@media (max-width: 1100px) {
+  .earning-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .earnings .container { width: 100%; padding: 30px 16px; box-sizing: border-box; }
+  .earnings .title, .earning-card { align-items: flex-start; flex-direction: column; }
+  .earning-summary { grid-template-columns: 1fr; }
+  .earning-right { margin-left: 0; align-items: flex-start; }
+}

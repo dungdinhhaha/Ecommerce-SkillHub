@@ -17,6 +17,7 @@ const Messages = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["conversations"],
     queryFn: () => request.get("/conversation").then((res) => res.data.data),
+    refetchInterval: 5000,
   });
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
@@ -27,21 +28,20 @@ const Messages = () => {
     mutation.mutate({ id });
   };
 
-  const msg =
-    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Necessitatibus, sapiente.";
   return (
     <div className="messages">
       <div className="container">
         <div className="title">
-          <h1>Orders</h1>
+          <h1>Tin nhắn</h1>
         </div>
         <table>
           <tbody>
             <tr>
               <th>{currentUser.isSeller ? "Buyer" : "Seller"}</th>
-              <th>Last Message</th>
-              <th>Date</th>
-              <th>Action</th>
+              <th>Sản phẩm</th>
+              <th>Tin nhắn cuối</th>
+              <th>Thời gian</th>
+              <th>Thao tác</th>
             </tr>
             {!isLoading && data.length > 0 ? (
               data.map((conversation) => (
@@ -61,8 +61,15 @@ const Messages = () => {
                   </td>
 
                   <td>
+                    <Link to={`/message/${conversation.id}`} className="link conversation-product">
+                      {conversation.gigId?.cover && <img src={conversation.gigId.cover} alt="" />}
+                      <span>{conversation.gigId?.title || "Chưa gắn sản phẩm"}</span>
+                    </Link>
+                  </td>
+
+                  <td>
                     <Link to={`/message/${conversation.id}`} className="link">
-                      {conversation.lastMessage.substring(0, 100)}...
+                      {(conversation.lastMessage || "Chưa có tin nhắn").substring(0, 100)}...
                     </Link>
                   </td>
                   <td>{moment(conversation.updatedAt).fromNow()}</td>
@@ -70,18 +77,18 @@ const Messages = () => {
                     {(currentUser.isSeller && !conversation.readBySeller) ||
                     (!currentUser.isSeller && !conversation.readByBuyer) ? (
                       <button onClick={() => handleRead(conversation.id)}>
-                        Mark as read
+                        Đánh dấu đã đọc
                       </button>
                     ) : (
                       <Link to={`/message/${conversation.id}`} className="link">
-                        <button>View</button>
+                        <button>Xem</button>
                       </Link>
                     )}
                   </td>
                 </tr>
               ))
             ) : (
-              <div className="no-msg">No messages</div>
+              <div className="no-msg">Chưa có tin nhắn</div>
             )}
           </tbody>
         </table>

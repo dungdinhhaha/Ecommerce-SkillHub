@@ -1,30 +1,16 @@
 import React, { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import request from "../../utils/request.utils";
+import { useNavigate } from "react-router-dom";
 
 const Success = () => {
   const navigate = useNavigate();
-  const { search } = useLocation();
-
-  const params = new URLSearchParams(search);
-  const payment_intent = params.get("payment_intent");
-
   useEffect(() => {
-    const makeRequest = async () => {
-      try {
-        await request.patch(`/gigs/order/${payment_intent}`);
-        setTimeout(() => navigate("/orders"), 5000);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    makeRequest();
-  });
+    const timer = window.setTimeout(() => navigate("/orders"), 2000);
+    return () => window.clearTimeout(timer);
+  }, [navigate]);
 
   return (
     <div>
-      Payment Successful. Redirecting to orders page please do not close the
-      page.
+      Thanh toán đã được tiếp nhận. Đang chuyển đến đơn hàng...
     </div>
   );
 };

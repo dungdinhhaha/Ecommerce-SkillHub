@@ -25,6 +25,11 @@ const ConversationModel = new mongoose.Schema(
       type: String,
       default: "",
     },
+    gigId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Gig",
+      default: null,
+    },
   },
   {
     timestamps: true,

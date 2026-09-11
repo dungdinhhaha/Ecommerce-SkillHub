@@ -1,14 +1,16 @@
 .featured {
-  height: 600px;
+  min-height: 650px;
   display: flex;
   justify-content: center;
   background-color: #013914;
   color: white;
 
   .container {
-    width: 1200px;
+    width: min(1200px, calc(100% - 32px));
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 34px;
 
     .left {
       display: flex;
@@ -16,46 +18,18 @@
       gap: 30px;
 
       h1 {
-        font-size: 50px;
+        font-size: clamp(42px, 5vw, 64px);
+        line-height: 1.12;
+        letter-spacing: -.045em;
         span{
             font-style: italic;
             font-weight: 300;
         }
       }
 
-      .search {
-        background-color: white;
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        overflow: hidden;
-
-        .search-input {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-
-          img {
-            width: 20px;
-            height: 20px;
-            margin: 10px;
-          }
-
-          input {
-            border: none;
-            outline: none;
-          }
-        }
-
-        button {
-          width: 120px;
-          height: 50px;
-          border: none;
-          background-color: #1dbf73;
-          color: white;
-          cursor: pointer;
-        }
+      .hero-search {
+        width: 750px;
+        max-width: 100%;
       }
 
       .popular {
@@ -76,12 +50,40 @@
       }
     }
     .right{
-        height: 100%;
+        align-self: end;
+        height: 610px;
+        flex: 0 0 42%;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
         img{
             height: 100%;
+            max-width: 100%;
             object-fit: contain;
+            object-position: bottom center;
         }
     }
 
+  }
+}
+
+@media (max-width: 900px) {
+  .featured {
+    min-height: auto;
+    padding: 58px 0;
+
+    .container {
+      .left {
+        width: 100%;
+
+        .popular {
+          flex-wrap: wrap;
+        }
+      }
+
+      .right {
+        display: none;
+      }
+    }
   }
 }

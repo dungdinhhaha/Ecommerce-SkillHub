@@ -1,3 +1,133 @@
-.home {
-  
+.home .browse-home {
+  display: flex;
+  justify-content: center;
+  padding: 58px 0 28px;
+  background: #fff;
+}
+
+.home .home-gigs {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0;
+}
+
+.home .home-gigs .container {
+  width: 1200px;
+}
+
+.home-gig-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.home .browse-home .container {
+  width: min(1200px, calc(100% - 32px));
+}
+
+.section-title h2 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+
+.section-title p {
+  margin: 0 0 24px;
+  color: #666;
+}
+
+.browse-group {
+  margin-bottom: 26px;
+}
+
+.browse-group h3 {
+  margin: 0 0 12px;
+}
+
+.browse-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.browse-card {
+  border: 1px solid var(--sh-border);
+  border-radius: 18px;
+  padding: 18px;
+  text-decoration: none;
+  color: #222;
+  background: white;
+  display: grid;
+  gap: 8px;
+  transition: 0.18s ease;
+  min-height: 92px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .04);
+}
+
+.browse-card:hover {
+  border-color: #1dbf73;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+.browse-card strong {
+  color: #1dbf73;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.browse-card span {
+  color: #666;
+  line-height: 1.45;
+  font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .home .browse-home .container,
+  .home .home-gigs .container {
+    width: min(100%, calc(100% - 28px));
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .home-gig-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .browse-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .section-title h2 {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+
+  .browse-group h3 {
+    font-size: 18px;
+  }
+
+  .browse-card {
+    padding: 16px;
+    min-height: 96px;
+  }
+}
+
+@media (max-width: 560px) {
+  .home .browse-home {
+    padding: 36px 0 18px;
+  }
+
+  .browse-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .browse-card {
+    border-radius: 16px;
+    min-height: unset;
+  }
+
+  .browse-card span {
+    font-size: 13px;
+  }
 }

@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: skillhub-api
+    env: node
+    rootDir: server
+    plan: free
+    buildCommand: pnpm install --frozen-lockfile || npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 7000
+      - key: DB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_COOKIE_EXPIRE
+        value: 7
+      - key: CLIENT_URL
+        sync: false
+      - key: SEPAY_BANK_ACCOUNT
+        sync: false
+      - key: SEPAY_BANK_CODE
+        sync: false
+      - key: SEPAY_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false

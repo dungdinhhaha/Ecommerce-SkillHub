@@ -1,71 +1,200 @@
 .footer {
   display: flex;
   justify-content: center;
-  color: #666;
-  margin: 50px 0px;
+  color: #475569;
+  padding: 58px 0 34px;
+  background: #ffffff;
+  border-top: 1px solid var(--sh-border);
+}
 
-  img {
-    width: 24px;
-    height: 24px;
+.footer img {
+  width: 24px;
+  height: 24px;
+}
+
+.footer .container {
+  width: min(1200px, calc(100% - 32px));
+}
+
+.footer-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #052e1a, #064e3b);
+  color: white;
+  margin-bottom: 34px;
+  box-shadow: var(--sh-shadow-soft);
+}
+
+.footer-intro h2 {
+  font-size: 34px;
+  letter-spacing: -.05em;
+}
+
+.footer-intro h2 span {
+  color: var(--sh-primary);
+}
+
+.footer-intro p {
+  color: #d1fae5;
+  max-width: 720px;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.footer-cta {
+  text-decoration: none;
+  color: #052e1a;
+  background: white;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.footer .top {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 30px;
+}
+
+.footer .item {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.footer .item h2 {
+  font-size: 16px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.footer .item span,
+.footer .item .link {
+  font-weight: 400;
+  color: #64748b;
+  text-decoration: none;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.footer .item .link:hover {
+  color: var(--sh-primary-dark);
+  text-decoration: underline;
+}
+
+.footer .contact {
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid var(--sh-border);
+}
+
+.footer hr {
+  margin: 38px 0;
+  height: 0;
+  border: 0;
+  border-top: 1px solid var(--sh-border);
+}
+
+.footer .bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.footer .bottom .left {
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer .bottom .left span {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.footer .bottom .right {
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.footer .bottom .right .link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 1000px) {
+  .footer .top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .footer {
+    padding: 28px 0 26px;
   }
 
-  .container {
-    width: 1200px;
-    .top {
-      display: flex;
-      justify-content: space-between;
-      .item {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        h2 {
-          font-size: 16px;
-          color: #555;
-        }
-        span {
-          font-weight: 300;
-        }
-      }
-    }
+  .footer-intro,
+  .footer .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    hr {
-      margin: 50px 0px;
-      height: 0;
-      border: 1px solid #ebe9e9;
-    }
-    .bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+  .footer-intro {
+    padding: 20px;
+    border-radius: 22px;
+    margin-bottom: 18px;
+  }
 
-      .left {
-        width: max-content;
-        display: flex;
-        align-items: center;
-        gap: 20px;
+  .footer-intro h2 {
+    font-size: 28px;
+  }
 
-        span {
-          font-size: 13px;
-          white-space: nowrap;
-        }
-      }
-      .right {
-        width: max-content;
-        display: flex;
-        align-items: center;
-        gap: 30px;
+  .footer-intro p {
+    font-size: 14px;
+  }
 
-        .social {
-          display: flex;
-          gap: 20px;
-        }
+  .footer .top {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 
-        .link {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-      }
-    }
+  .footer .item {
+    padding: 18px;
+    border: 1px solid var(--sh-border);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .04);
+    gap: 11px;
+  }
+
+  .footer .item.contact {
+    background: #f8fafc;
+  }
+
+  .footer .item h2 {
+    font-size: 17px;
+    margin: 0 0 2px;
+  }
+
+  .footer .bottom .left,
+  .footer .bottom .right {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .footer hr {
+    margin: 24px 0;
   }
 }

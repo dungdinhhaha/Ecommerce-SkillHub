@@ -1,0 +1,467 @@
+require("dotenv").config();
+const mongoose = require("mongoose");
+const User = require("../models/user.model");
+const Gig = require("../models/gig.model");
+
+const demoPassword = "SkillHub123!";
+const productFile = "https://res.cloudinary.com/ov2xvpak/image/upload/v1788597883/check.png";
+
+const coverImages = {
+  powerpoint: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80",
+  reactBug: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=1200&q=80",
+  api: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+  adminDashboard: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+  sql: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=1200&q=80",
+  logo: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1200&q=80",
+  banner: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1200&q=80",
+  uiKit: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1200&q=80",
+  poster: "https://images.unsplash.com/photo-1607083206968-13611e3d76db?auto=format&fit=crop&w=1200&q=80",
+  seo: "https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?auto=format&fit=crop&w=1200&q=80",
+  facebookContent: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&w=1200&q=80",
+  prompts: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80",
+  reels: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&w=1200&q=80",
+  thumbnail: "https://images.unsplash.com/photo-1616469829941-c7200edec809?auto=format&fit=crop&w=1200&q=80",
+  preset: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80",
+  wordTemplate: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+  reactEbook: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+  excel: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80",
+  businessPlan: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80",
+  landingPage: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+  ecommerce: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80",
+  cv: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=1200&q=80",
+  rejected: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80",
+};
+
+const users = [
+  { username: "skillhub_admin", email: "admin@skillhub.demo", country: "Vietnam", isAdmin: true, isSeller: false },
+  { username: "design_talent", email: "design@skillhub.demo", country: "Vietnam", isAdmin: false, isSeller: true, desc: "Thiết kế PowerPoint, CV và UI/UX." },
+  { username: "code_talent", email: "code@skillhub.demo", country: "Vietnam", isAdmin: false, isSeller: true, desc: "React, Node.js và xây dựng website." },
+  { username: "content_talent", email: "content@skillhub.demo", country: "Vietnam", isAdmin: false, isSeller: true, desc: "Viết content, SEO và mô tả sản phẩm." },
+  { username: "media_talent", email: "media@skillhub.demo", country: "Vietnam", isAdmin: false, isSeller: true, desc: "Edit video ngắn, thumbnail và hình ảnh mạng xã hội." },
+  { username: "study_talent", email: "study@skillhub.demo", country: "Vietnam", isAdmin: false, isSeller: true, desc: "Tài liệu học tập, template báo cáo và hướng dẫn phần mềm." },
+  { username: "demo_buyer", email: "buyer@skillhub.demo", country: "Vietnam", isAdmin: false, isSeller: false },
+];
+
+const listings = [
+  {
+    title: "Thiết kế PowerPoint chuyên nghiệp",
+    listingType: "skill_service",
+    description: "Thiết kế slide thuyết trình rõ ràng, hiện đại, phù hợp bài học và dự án.",
+    shortTitle: "Thiết kế PowerPoint",
+    shortDesc: "Slide đẹp, dễ trình bày, giao đúng thời hạn.",
+    cat: "design", price: 100000, deliveryTime: 2, revisionNumber: 2,
+    features: ["Thiết kế 10 slide", "Chỉnh màu theo yêu cầu", "2 lần chỉnh sửa"],
+    approvalStatus: "approved", cover: coverImages.powerpoint,
+  },
+  {
+    title: "Fix bug React và tối ưu component",
+    listingType: "skill_service",
+    description: "Kiểm tra lỗi giao diện, state, props, API call trong project React/Vite và hướng dẫn cách sửa.",
+    shortTitle: "Fix bug React",
+    shortDesc: "Sửa lỗi React nhanh, giải thích dễ hiểu.",
+    cat: "web", price: 180000, deliveryTime: 2, revisionNumber: 1,
+    features: ["Debug lỗi React", "Ghi chú nguyên nhân", "Hướng dẫn tránh lỗi lặp lại"],
+    approvalStatus: "approved", cover: coverImages.reactBug, sales: 8,
+  },
+  {
+    title: "Viết API Node.js Express MongoDB",
+    listingType: "skill_service",
+    description: "Xây dựng API cơ bản bằng Node.js, Express và MongoDB cho đồ án hoặc MVP.",
+    shortTitle: "API Node.js",
+    shortDesc: "REST API sạch, dễ kết nối frontend.",
+    cat: "web", price: 650000, deliveryTime: 5, revisionNumber: 2,
+    features: ["Auth JWT", "CRUD MongoDB", "Tài liệu endpoint"],
+    approvalStatus: "approved", cover: coverImages.api, sales: 5,
+  },
+  {
+    title: "Source code dashboard admin React",
+    listingType: "digital_product",
+    description: "Bộ source dashboard admin mẫu gồm sidebar, bảng dữ liệu, form lọc và responsive cơ bản.",
+    shortTitle: "Admin dashboard source",
+    shortDesc: "Source React admin dashboard tải ngay.",
+    cat: "web", price: 129000, deliveryTime: 0, revisionNumber: 0,
+    features: ["React + SCSS", "Bảng quản trị", "Layout responsive"],
+    digitalFileUrl: productFile, digitalFileName: "admin-dashboard-source-demo.png",
+    approvalStatus: "approved", cover: coverImages.adminDashboard, sales: 18,
+  },
+  {
+    title: "SQL database mẫu quản lý bán hàng",
+    listingType: "digital_product",
+    description: "File database SQL mẫu cho bài tập quản lý bán hàng: khách hàng, sản phẩm, đơn hàng, chi tiết đơn.",
+    shortTitle: "SQL bán hàng",
+    shortDesc: "Database mẫu dùng cho bài tập/đồ án.",
+    cat: "web", price: 39000, deliveryTime: 0, revisionNumber: 0,
+    features: ["Schema SQL", "Dữ liệu mẫu", "Gợi ý truy vấn"],
+    digitalFileUrl: productFile, digitalFileName: "sales-database-demo.png",
+    approvalStatus: "approved", cover: coverImages.sql, sales: 32,
+  },
+  {
+    title: "Thiết kế logo thương hiệu",
+    listingType: "skill_service",
+    description: "Thiết kế logo tối giản, có file PNG và bản dùng cho mạng xã hội.",
+    shortTitle: "Logo thương hiệu",
+    shortDesc: "Logo hiện đại cho cá nhân và doanh nghiệp nhỏ.",
+    cat: "design", price: 250000, deliveryTime: 4, revisionNumber: 3,
+    features: ["3 ý tưởng ban đầu", "File PNG nền trong", "3 lần chỉnh sửa"],
+    approvalStatus: "approved", cover: coverImages.logo,
+  },
+  {
+    title: "Thiết kế banner Facebook/TikTok Shop",
+    listingType: "skill_service",
+    description: "Thiết kế banner quảng cáo, ảnh bìa hoặc ảnh sản phẩm cho mạng xã hội và sàn thương mại điện tử.",
+    shortTitle: "Banner social",
+    shortDesc: "Banner đẹp, đúng kích thước, dễ dùng.",
+    cat: "design", price: 120000, deliveryTime: 2, revisionNumber: 2,
+    features: ["2 mẫu banner", "File PNG/JPG", "Chỉnh sửa màu chữ"],
+    approvalStatus: "approved", cover: coverImages.banner, sales: 14,
+  },
+  {
+    title: "UI Kit landing page SaaS",
+    listingType: "digital_product",
+    description: "Bộ UI kit landing page SaaS gồm hero, pricing, testimonial, FAQ và CTA để tham khảo thiết kế.",
+    shortTitle: "SaaS UI Kit",
+    shortDesc: "UI kit dùng cho landing page startup.",
+    cat: "design", price: 79000, deliveryTime: 0, revisionNumber: 0,
+    features: ["Hero section", "Pricing cards", "FAQ + CTA"],
+    digitalFileUrl: productFile, digitalFileName: "saas-ui-kit-demo.png",
+    approvalStatus: "approved", cover: coverImages.uiKit, sales: 21,
+  },
+  {
+    title: "Template poster sự kiện sinh viên",
+    listingType: "digital_product",
+    description: "Bộ poster mẫu cho workshop, seminar, cuộc thi sinh viên, dễ chỉnh sửa theo nội dung riêng.",
+    shortTitle: "Poster sự kiện",
+    shortDesc: "Poster mẫu đẹp cho CLB/lớp/nhóm.",
+    cat: "design", price: 45000, deliveryTime: 0, revisionNumber: 0,
+    features: ["3 mẫu poster", "Font gợi ý", "Màu dễ sửa"],
+    digitalFileUrl: productFile, digitalFileName: "student-event-poster-demo.png",
+    approvalStatus: "approved", cover: coverImages.poster, sales: 11,
+  },
+  {
+    title: "Viết mô tả sản phẩm chuẩn SEO",
+    listingType: "skill_service",
+    description: "Viết mô tả sản phẩm rõ lợi ích, tối ưu từ khóa, phù hợp website bán hàng hoặc marketplace.",
+    shortTitle: "Mô tả sản phẩm SEO",
+    shortDesc: "Nội dung bán hàng rõ ràng, dễ chuyển đổi.",
+    cat: "writing", price: 90000, deliveryTime: 2, revisionNumber: 2,
+    features: ["Tối ưu từ khóa", "Giọng văn bán hàng", "2 lần chỉnh sửa"],
+    approvalStatus: "approved", cover: coverImages.seo, sales: 7,
+  },
+  {
+    title: "Viết content Facebook 7 ngày",
+    listingType: "skill_service",
+    description: "Lên ý tưởng và viết 7 bài đăng Facebook cho cá nhân, lớp học, cửa hàng nhỏ hoặc dự án sinh viên.",
+    shortTitle: "Content Facebook",
+    shortDesc: "7 bài đăng có hook và CTA rõ.",
+    cat: "writing", price: 220000, deliveryTime: 4, revisionNumber: 2,
+    features: ["7 caption", "Gợi ý hình ảnh", "Hashtag"],
+    approvalStatus: "approved", cover: coverImages.facebookContent, sales: 9,
+  },
+  {
+    title: "Bộ prompt viết content bằng AI",
+    listingType: "digital_product",
+    description: "Bộ prompt mẫu giúp viết caption, mô tả sản phẩm, email và ý tưởng nội dung bằng AI.",
+    shortTitle: "Prompt content AI",
+    shortDesc: "Tải ngay bộ prompt content dễ dùng.",
+    cat: "writing", price: 59000, deliveryTime: 0, revisionNumber: 0,
+    features: ["30 prompt mẫu", "Chia theo mục đích", "Hướng dẫn sử dụng"],
+    digitalFileUrl: productFile, digitalFileName: "ai-content-prompts-demo.png",
+    approvalStatus: "approved", cover: coverImages.prompts, sales: 25,
+  },
+  {
+    title: "Edit video TikTok/Reels ngắn",
+    listingType: "skill_service",
+    description: "Cắt ghép video ngắn, thêm subtitle, nhạc, hiệu ứng cơ bản cho TikTok, Reels hoặc Shorts.",
+    shortTitle: "Edit video ngắn",
+    shortDesc: "Video gọn, bắt mắt, có phụ đề.",
+    cat: "video", price: 150000, deliveryTime: 2, revisionNumber: 2,
+    features: ["Video dưới 60s", "Subtitle", "2 lần chỉnh sửa"],
+    approvalStatus: "approved", cover: coverImages.reels, sales: 16,
+  },
+  {
+    title: "Thiết kế thumbnail YouTube",
+    listingType: "skill_service",
+    description: "Thiết kế thumbnail YouTube/TikTok có điểm nhấn, dễ đọc chữ, phù hợp chủ đề học tập/giải trí.",
+    shortTitle: "Thumbnail YouTube",
+    shortDesc: "Thumbnail nổi bật, đúng kích thước.",
+    cat: "video", price: 80000, deliveryTime: 1, revisionNumber: 1,
+    features: ["1 thumbnail", "File PNG", "Chỉnh chữ/màu"],
+    approvalStatus: "approved", cover: coverImages.thumbnail, sales: 19,
+  },
+  {
+    title: "Preset chỉnh màu ảnh sản phẩm",
+    listingType: "digital_product",
+    description: "Bộ preset chỉnh màu ảnh sản phẩm theo phong cách sáng, sạch, phù hợp đăng mạng xã hội.",
+    shortTitle: "Preset ảnh sản phẩm",
+    shortDesc: "Preset tải về dùng cho ảnh bán hàng.",
+    cat: "video", price: 49000, deliveryTime: 0, revisionNumber: 0,
+    features: ["5 preset màu", "Hướng dẫn áp dụng", "Phù hợp ảnh sản phẩm"],
+    digitalFileUrl: productFile, digitalFileName: "product-photo-preset-demo.png",
+    approvalStatus: "approved", cover: coverImages.preset, sales: 13,
+  },
+  {
+    title: "Template báo cáo tiểu luận Word",
+    listingType: "digital_product",
+    description: "File Word mẫu có bìa, mục lục, heading, danh mục bảng/hình, phù hợp bài tiểu luận sinh viên.",
+    shortTitle: "Template tiểu luận",
+    shortDesc: "Mẫu Word bài tiểu luận chỉnh sẵn format.",
+    cat: "education", price: 39000, deliveryTime: 0, revisionNumber: 0,
+    features: ["Bìa tiểu luận", "Mục lục tự động", "Heading chuẩn"],
+    digitalFileUrl: productFile, digitalFileName: "word-report-template-demo.png",
+    approvalStatus: "approved", cover: coverImages.wordTemplate, sales: 41,
+  },
+  {
+    title: "Ebook hướng dẫn React cơ bản",
+    listingType: "digital_product",
+    description: "Tài liệu học React cơ bản gồm component, props, state, hooks và ví dụ project nhỏ.",
+    shortTitle: "Ebook React",
+    shortDesc: "Tài liệu React cơ bản cho người mới.",
+    cat: "education", price: 69000, deliveryTime: 0, revisionNumber: 0,
+    features: ["Hooks cơ bản", "Ví dụ project", "Checklist ôn tập"],
+    digitalFileUrl: productFile, digitalFileName: "react-basic-ebook-demo.png",
+    approvalStatus: "approved", cover: coverImages.reactEbook, sales: 34,
+  },
+  {
+    title: "Hướng dẫn Excel cho báo cáo bán hàng",
+    listingType: "skill_service",
+    description: "Hướng dẫn làm bảng Excel tính doanh thu, biểu đồ, lọc dữ liệu và trình bày báo cáo bán hàng.",
+    shortTitle: "Hướng dẫn Excel",
+    shortDesc: "Kèm 1 file mẫu và hướng dẫn thao tác.",
+    cat: "education", price: 130000, deliveryTime: 2, revisionNumber: 1,
+    features: ["File Excel mẫu", "Biểu đồ", "Công thức cơ bản"],
+    approvalStatus: "approved", cover: coverImages.excel, sales: 6,
+  },
+  {
+    title: "Template kế hoạch kinh doanh",
+    listingType: "digital_product",
+    description: "Mẫu kế hoạch kinh doanh có các phần: ý tưởng, thị trường, marketing, tài chính, pháp lý, rủi ro.",
+    shortTitle: "Template business plan",
+    shortDesc: "Mẫu kế hoạch kinh doanh dành cho bài tập.",
+    cat: "education", price: 59000, deliveryTime: 0, revisionNumber: 0,
+    features: ["Mục lục gợi ý", "Bảng tài chính mẫu", "Phần pháp lý/rủi ro"],
+    digitalFileUrl: productFile, digitalFileName: "business-plan-template-demo.png",
+    approvalStatus: "approved", cover: coverImages.businessPlan, sales: 29,
+  },
+  {
+    title: "Xây dựng landing page React",
+    listingType: "skill_service",
+    description: "Lập trình landing page React responsive, tối ưu giao diện và cấu trúc component.",
+    shortTitle: "Landing page React",
+    shortDesc: "Giao diện responsive, code dễ mở rộng.",
+    cat: "web", price: 1500000, deliveryTime: 7, revisionNumber: 2,
+    features: ["React + Vite", "Responsive", "Bàn giao source code"],
+    approvalStatus: "approved", cover: coverImages.landingPage,
+  },
+  {
+    title: "React E-commerce Template Demo",
+    listingType: "digital_product",
+    description: "Template demo React cho website thương mại điện tử, dùng để học tập và phát triển dự án.",
+    shortTitle: "Template React bán hàng",
+    shortDesc: "Sản phẩm số tải trực tuyến sau khi thanh toán.",
+    cat: "web", price: 99000, deliveryTime: 0, revisionNumber: 0,
+    features: ["Source code demo", "Cấu trúc React", "Hướng dẫn cài đặt"],
+    digitalFileUrl: productFile, digitalFileName: "react-ecommerce-template-demo.png",
+    approvalStatus: "approved", cover: coverImages.ecommerce,
+  },
+  {
+    title: "Bộ template CV Canva",
+    listingType: "digital_product",
+    description: "Bộ mẫu CV có thể chỉnh sửa cho sinh viên và người mới đi làm.",
+    shortTitle: "CV Canva cho sinh viên",
+    shortDesc: "Bộ template CV tải về trực tuyến.",
+    cat: "design", price: 49000, deliveryTime: 0, revisionNumber: 0,
+    features: ["5 mẫu CV", "Dễ chỉnh sửa", "Phù hợp sinh viên"],
+    digitalFileUrl: productFile, digitalFileName: "canva-cv-template-demo.png",
+    approvalStatus: "pending", cover: coverImages.cv,
+  },
+  {
+    title: "Dịch vụ tăng like ảo không minh bạch",
+    listingType: "skill_service",
+    description: "Listing mẫu bị từ chối để admin có dữ liệu kiểm duyệt nội dung không phù hợp.",
+    shortTitle: "Listing bị từ chối",
+    shortDesc: "Dữ liệu mẫu cho tab quản trị.",
+    cat: "writing", price: 50000, deliveryTime: 1, revisionNumber: 0,
+    features: ["Không phù hợp chính sách"],
+    approvalStatus: "rejected", rejectionReason: "Nội dung không phù hợp chính sách nền tảng.", cover: coverImages.rejected,
+  },
+];
+
+const extraCoverImages = [
+  "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1607083206968-13611e3d76db?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1523726491678-bf852e717f6a?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1201&q=80",
+  "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1616469829941-c7200edec809?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1201&q=80",
+  "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=80",
+];
+
+const seedImage = (seed) => {
+  const numericSeed = String(seed).match(/\d+/)?.[0] || "0";
+  const index = Math.abs(Number.parseInt(numericSeed, 10) || 0) % extraCoverImages.length;
+  return extraCoverImages[index];
+};
+
+const extraListingTemplates = [
+  ["Landing page spa/minh họa dịch vụ", "skill_service", "web", "code_talent", 450000, 4, 2, ["React responsive", "Form liên hệ", "Tối ưu mobile"]],
+  ["Source code blog cá nhân React", "digital_product", "web", "code_talent", 89000, 0, 0, ["React Router", "Trang bài viết", "Dễ tuỳ biến"]],
+  ["Tích hợp đăng nhập JWT", "skill_service", "web", "code_talent", 350000, 3, 1, ["Login/Register", "JWT cookie", "Bảo vệ route"]],
+  ["Template portfolio developer", "digital_product", "web", "code_talent", 79000, 0, 0, ["Trang dự án", "Giới thiệu bản thân", "Responsive"]],
+  ["Sửa responsive website", "skill_service", "web", "code_talent", 220000, 2, 2, ["Kiểm tra mobile", "Sửa layout vỡ", "Tối ưu tablet"]],
+  ["Source code quản lý công việc", "digital_product", "web", "code_talent", 119000, 0, 0, ["CRUD task", "Filter trạng thái", "Local storage"]],
+  ["Thiết kế database MongoDB", "skill_service", "web", "code_talent", 300000, 3, 1, ["Schema rõ ràng", "Quan hệ dữ liệu", "Gợi ý index"]],
+  ["API đặt lịch đơn giản", "skill_service", "web", "code_talent", 520000, 5, 2, ["CRUD lịch hẹn", "Validate dữ liệu", "Tài liệu endpoint"]],
+  ["Template dashboard thống kê", "digital_product", "web", "code_talent", 129000, 0, 0, ["Chart mẫu", "Sidebar", "Bảng dữ liệu"]],
+  ["Tối ưu tốc độ React page", "skill_service", "web", "code_talent", 260000, 2, 1, ["Giảm render thừa", "Lazy load", "Tối ưu ảnh"]],
+
+  ["Logo tối giản cho shop nhỏ", "skill_service", "design", "design_talent", 180000, 3, 3, ["2 concept", "PNG nền trong", "File vuông social"]],
+  ["Bộ icon mạng xã hội", "digital_product", "design", "design_talent", 49000, 0, 0, ["20 icon", "PNG/SVG", "Dễ đổi màu"]],
+  ["Thiết kế CV xin việc", "skill_service", "design", "design_talent", 120000, 2, 2, ["CV 1 trang", "Chỉnh nội dung", "PDF sẵn in"]],
+  ["Template CV ATS tiếng Việt", "digital_product", "design", "design_talent", 59000, 0, 0, ["Word + PDF", "Bố cục ATS", "Hướng dẫn sửa"]],
+  ["Thiết kế menu quán cà phê", "skill_service", "design", "design_talent", 220000, 3, 2, ["Menu 2 mặt", "File in ấn", "Chỉnh màu"]],
+  ["Bộ template Instagram post", "digital_product", "design", "design_talent", 69000, 0, 0, ["12 mẫu post", "Canva style", "Phù hợp bán hàng"]],
+  ["Thiết kế poster tuyển thành viên", "skill_service", "design", "design_talent", 90000, 1, 1, ["Poster CLB", "File PNG", "Sửa chữ nhanh"]],
+  ["UI màn hình đăng nhập app", "skill_service", "design", "design_talent", 250000, 3, 2, ["Mobile UI", "Màu thương hiệu", "Prototype đơn giản"]],
+  ["Template proposal dịch vụ", "digital_product", "design", "design_talent", 79000, 0, 0, ["Bìa proposal", "Bảng giá", "Case study"]],
+  ["Thiết kế ảnh sản phẩm Shopee", "skill_service", "design", "design_talent", 150000, 2, 2, ["3 ảnh sản phẩm", "Text nổi bật", "Tỷ lệ sàn TMĐT"]],
+
+  ["Viết bài SEO 1000 từ", "skill_service", "writing", "content_talent", 180000, 3, 2, ["Dàn ý", "Từ khóa chính", "Meta description"]],
+  ["Bộ mẫu email chăm sóc khách hàng", "digital_product", "writing", "content_talent", 59000, 0, 0, ["10 email mẫu", "Nhiều ngành", "Dễ copy"]],
+  ["Viết kịch bản video ngắn", "skill_service", "writing", "content_talent", 120000, 2, 2, ["Hook 3 giây", "CTA", "Shot list"]],
+  ["Template mô tả sản phẩm bán hàng", "digital_product", "writing", "content_talent", 39000, 0, 0, ["15 mẫu mô tả", "Theo ngành", "Có công thức viết"]],
+  ["Viết caption Facebook bán hàng", "skill_service", "writing", "content_talent", 80000, 1, 1, ["5 caption", "Hashtag", "CTA"]],
+  ["Bộ prompt chăm sóc fanpage", "digital_product", "writing", "content_talent", 69000, 0, 0, ["Prompt content", "Prompt trả lời inbox", "Prompt ý tưởng"]],
+  ["Lên lịch nội dung 14 ngày", "skill_service", "writing", "content_talent", 250000, 4, 2, ["Calendar 14 ngày", "Ý tưởng bài viết", "Gợi ý hình"]],
+  ["Viết nội dung landing page", "skill_service", "writing", "content_talent", 300000, 3, 2, ["Hero copy", "Lợi ích", "FAQ + CTA"]],
+  ["Template kịch bản livestream", "digital_product", "writing", "content_talent", 45000, 0, 0, ["Mở đầu", "Giới thiệu sản phẩm", "Chốt đơn"]],
+  ["Biên tập bài giới thiệu thương hiệu", "skill_service", "writing", "content_talent", 160000, 2, 2, ["Giọng văn rõ", "Câu chuyện thương hiệu", "Sửa lỗi diễn đạt"]],
+
+  ["Edit video review sản phẩm", "skill_service", "video", "media_talent", 180000, 2, 2, ["Cắt ghép", "Subtitle", "Nhạc nền"]],
+  ["Bộ preset màu TikTok", "digital_product", "video", "media_talent", 49000, 0, 0, ["5 preset", "Tone sáng", "Hướng dẫn áp dụng"]],
+  ["Thiết kế thumbnail khóa học", "skill_service", "video", "media_talent", 90000, 1, 1, ["Thumbnail 16:9", "Text nổi", "File PNG"]],
+  ["Template intro video ngắn", "digital_product", "video", "media_talent", 59000, 0, 0, ["3 intro", "Dễ thay text", "Dùng cho Reels"]],
+  ["Cắt podcast thành short clip", "skill_service", "video", "media_talent", 220000, 3, 2, ["3 clip ngắn", "Caption", "Highlight ý chính"]],
+  ["Bộ LUT màu ảnh đồ ăn", "digital_product", "video", "media_talent", 69000, 0, 0, ["Tone ấm", "Tone sáng", "Hướng dẫn dùng"]],
+  ["Làm subtitle video 3 phút", "skill_service", "video", "media_talent", 130000, 2, 1, ["Phụ đề tiếng Việt", "Canh nhịp", "File xuất sẵn"]],
+  ["Template storyboard video ads", "digital_product", "video", "media_talent", 45000, 0, 0, ["Hook", "Problem/Solution", "CTA"]],
+  ["Chỉnh ảnh sản phẩm nền trắng", "skill_service", "video", "media_talent", 110000, 1, 1, ["5 ảnh", "Nền trắng", "Cân sáng"]],
+  ["Tạo ảnh bìa YouTube channel", "skill_service", "video", "media_talent", 140000, 2, 2, ["Banner channel", "Đúng kích thước", "File PNG"]],
+
+  ["Template kế hoạch học tập 30 ngày", "digital_product", "education", "study_talent", 49000, 0, 0, ["Lịch 30 ngày", "Checklist", "Theo dõi tiến độ"]],
+  ["Hướng dẫn Power BI cơ bản", "skill_service", "education", "study_talent", 220000, 3, 1, ["Dashboard mẫu", "Biểu đồ", "File thực hành"]],
+  ["Ebook học JavaScript nền tảng", "digital_product", "education", "study_talent", 79000, 0, 0, ["Biến/hàm", "DOM", "Bài tập nhỏ"]],
+  ["Làm slide thuyết trình bài nhóm", "skill_service", "education", "study_talent", 180000, 2, 2, ["10 slide", "Dàn ý rõ", "Thiết kế dễ trình bày"]],
+  ["Template báo cáo thực tập", "digital_product", "education", "study_talent", 69000, 0, 0, ["Bìa", "Mục lục", "Chương mẫu"]],
+  ["File Excel quản lý chi tiêu", "digital_product", "education", "study_talent", 39000, 0, 0, ["Theo dõi thu chi", "Biểu đồ", "Công thức sẵn"]],
+  ["Hướng dẫn làm tiểu luận chuẩn format", "skill_service", "education", "study_talent", 120000, 2, 1, ["Căn lề", "Heading", "Mục lục tự động"]],
+  ["Bộ flashcard thuật ngữ marketing", "digital_product", "education", "study_talent", 45000, 0, 0, ["50 thuật ngữ", "Định nghĩa ngắn", "Ví dụ dễ nhớ"]],
+  ["Template kế hoạch kinh doanh startup", "digital_product", "education", "study_talent", 89000, 0, 0, ["Business model", "Tài chính", "Rủi ro"]],
+  ["Gia sư Excel dashboard mini", "skill_service", "education", "study_talent", 250000, 3, 1, ["Pivot table", "Chart", "Dashboard cơ bản"]],
+];
+
+const extraListings = extraListingTemplates.map(([title, listingType, cat, ownerUsername, price, deliveryTime, revisionNumber, features], index) => {
+  const isDigital = listingType === "digital_product";
+  const shortTitle = title.replace(/^(Source code|Template|Thiết kế|Viết|Bộ|Hướng dẫn|Làm|Gia sư)\s+/i, "").slice(0, 32);
+  return {
+    title,
+    listingType,
+    ownerUsername,
+    description: `${title} dành cho buyer cần kết quả rõ ràng, dễ sử dụng và bàn giao đúng phạm vi trên SkillHub.`,
+    shortTitle,
+    shortDesc: isDigital ? "Tải ngay sau khi thanh toán thành công." : "Talent xử lý theo yêu cầu, có cập nhật tiến độ.",
+    cat,
+    price,
+    deliveryTime,
+    revisionNumber,
+    features,
+    digitalFileUrl: isDigital ? productFile : "",
+    digitalFileName: isDigital ? `${title.toLowerCase().replace(/[^a-z0-9à-ỹ]+/gi, "-")}-demo.png` : "",
+    approvalStatus: "approved",
+    cover: seedImage(index + 1),
+    images: [seedImage(`detail-${index + 1}`), seedImage(`preview-${index + 1}`)],
+    sales: (index * 7) % 48,
+    totalStars: [0, 20, 24, 45, 50][index % 5],
+    starNumber: [0, 4, 5, 9, 10][index % 5],
+  };
+});
+
+async function getOrCreateUser(data) {
+  let user = await User.findOne({ username: data.username });
+  if (!user) user = new User({ ...data, password: demoPassword });
+  else Object.assign(user, data);
+  await user.save();
+  return user;
+}
+
+async function seed() {
+  await mongoose.connect(process.env.DB_URI);
+  const savedUsers = {};
+  for (const user of users) savedUsers[user.username] = await getOrCreateUser(user);
+  for (const listing of [...listings, ...extraListings]) {
+    let owner = savedUsers.code_talent;
+    if (listing.ownerUsername) owner = savedUsers[listing.ownerUsername];
+    else if (["design"].includes(listing.cat)) owner = savedUsers.design_talent;
+    else if (["writing"].includes(listing.cat)) owner = savedUsers.content_talent;
+    else if (["video"].includes(listing.cat)) owner = savedUsers.media_talent;
+    else if (["education"].includes(listing.cat)) owner = savedUsers.study_talent;
+    const { ownerUsername, ...listingData } = listing;
+    await Gig.findOneAndUpdate(
+      { title: listing.title, userId: owner._id },
+      { ...listingData, userId: owner._id },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+  }
+  console.log("Demo data seeded without deleting existing data.");
+  console.log("Demo login password: SkillHub123!");
+  console.log("Users: skillhub_admin, design_talent, code_talent, demo_buyer");
+  await mongoose.disconnect();
+}
+
+seed().catch(async (err) => {
+  console.error(err);
+  await mongoose.disconnect();
+  process.exit(1);
+});

@@ -15,76 +15,142 @@ import {
   Register,
   Pay,
   Success,
+  Admin,
+  Earnings,
+  Wallet,
+  Library,
+  Policy,
+  Wishlist,
+  OrderDetail,
+  TalentDashboard,
+  About,
+  Account,
+  TalentVouchers,
+  Cart,
 } from "../pages";
 
 import { Navbar, Footer } from "../components";
+import ScrollToTop from "../components/scrollToTop/ScrollToTop";
+
+const queryClient = new QueryClient();
 
 const Layout = () => {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="app">
-        <Navbar />
-        <Outlet />
-        <Footer />
-      </div>
-    </QueryClientProvider>
+    <div className="app">
+      <Navbar />
+      <Outlet />
+      <Footer />
+    </div>
   );
 };
 const Routes = [
   {
     path: "/",
-    element: <Layout />,
+    element: <QueryClientProvider client={queryClient}><ScrollToTop /><Outlet /></QueryClientProvider>,
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: <Layout />,
+        children: [
+          {
+            path: "/",
+            element: <Home />,
+          },
+          {
+            path: "/gigs",
+            element: <Gigs />,
+          },
+          {
+            path: "/mygigs",
+            element: <MyGigs />,
+          },
+          {
+            path: "/orders",
+            element: <Orders />,
+          },
+          {
+            path: "/orders/:id",
+            element: <OrderDetail />,
+          },
+          {
+            path: "/gig/:id",
+            element: <Gig />,
+          },
+          {
+            path: "/messages",
+            element: <Messages />,
+          },
+          {
+            path: "/message/:id",
+            element: <Message />,
+          },
+          {
+            path: "/add",
+            element: <Add />,
+          },
+          {
+            path: "/pay/:id",
+            element: <Pay />,
+          },
+          {
+            path: "/success",
+            element: <Success />,
+          },
+          {
+            path: "/admin",
+            element: <Admin />,
+          },
+          {
+            path: "/earnings",
+            element: <Earnings />,
+          },
+          {
+            path: "/wallet",
+            element: <Wallet />,
+          },
+          {
+            path: "/library",
+            element: <Library />,
+          },
+          {
+            path: "/policy",
+            element: <Policy />,
+          },
+          {
+            path: "/wishlist",
+            element: <Wishlist />,
+          },
+          {
+            path: "/cart",
+            element: <Cart />,
+          },
+          {
+            path: "/talent/dashboard",
+            element: <TalentDashboard />,
+          },
+          {
+            path: "/about",
+            element: <About />,
+          },
+          {
+            path: "/account",
+            element: <Account />,
+          },
+          {
+            path: "/talent/vouchers",
+            element: <TalentVouchers />,
+          },
+        ],
       },
       {
-        path: "/gigs",
-        element: <Gigs />,
+        path: "/register",
+        element: <Register />,
       },
       {
-        path: "/mygigs",
-        element: <MyGigs />,
-      },
-      {
-        path: "/orders",
-        element: <Orders />,
-      },
-      {
-        path: "/gig/:id",
-        element: <Gig />,
-      },
-      {
-        path: "/messages",
-        element: <Messages />,
-      },
-      {
-        path: "/message/:id",
-        element: <Message />,
-      },
-      {
-        path: "/add",
-        element: <Add />,
-      },
-      {
-        path: "/pay/:id",
-        element: <Pay />,
-      },
-      {
-        path: "/success",
-        element: <Success />,
+        path: "/login",
+        element: <Login />,
       },
     ],
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
   },
 ];
 

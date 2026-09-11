@@ -1,52 +1,66 @@
-.orders {
-  display: flex;
-  justify-content: center;
+.orders { display: flex; justify-content: center; background: linear-gradient(180deg, #fff, #f7faf9); }
+.orders .container { width: 1200px; padding: 50px 0; }
+.orders .title { display: flex; justify-content: space-between; align-items: center; }
+.orders .title span { color: #777; }
+.orders-hint { color: #666; margin: 8px 0 18px; }
+.order-stats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin: 18px 0 6px; }
+.order-stats article { border: 1px solid var(--sh-border); border-radius: 16px; padding: 14px; background: white; display: grid; gap: 6px; box-shadow: var(--sh-shadow-soft); }
+.order-stats small { color: #666; }
+.order-stats strong { color: #1dbf73; font-size: 22px; }
+.order-list { display: grid; gap: 18px; margin-top: 25px; }
+.order-card { border: 1px solid var(--sh-border); border-radius: 20px; overflow: hidden; background: white; box-shadow: var(--sh-shadow-soft); }
+.order-head { padding: 15px 18px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
+.order-head small { display: block; color: #777; margin-top: 6px; }
+.status { padding: 6px 10px; border-radius: 14px; font-size: 13px; background: #eef2f4; height: fit-content; }
+.status.completed { background: #dcf7e8; color: #16864d; }
+.status.disputed { background: #fff0d6; color: #a66500; }
+.order-stepper { padding: 16px 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; border-bottom: 1px solid #eee; background: #fbfdfc; position: relative; }
+.order-stepper .step { display: flex; align-items: center; gap: 9px; min-width: 0; color: var(--sh-muted); }
+.order-stepper .step span { width: 28px; height: 28px; flex: 0 0 auto; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #e5e7eb; color: #475569; font-weight: 800; }
+.order-stepper .step.done span { background: var(--sh-primary); color: white; }
+.order-stepper .step.done p { color: var(--sh-primary-dark); font-weight: 800; }
+.order-stepper .step p { overflow-wrap: anywhere; }
+.step-note { grid-column: 1 / -1; padding: 10px 12px; border-radius: 12px; background: #fff7ed; color: #c2410c; font-size: 13px; }
+.step-note.danger { background: #fef2f2; color: #b91c1c; }
+.order-body { padding: 18px; display: flex; gap: 18px; align-items: center; }
+.order-body .image { width: 120px; height: 80px; object-fit: cover; border-radius: 5px; }
+.order-info { flex: 1; }
+.order-info h2 { margin: 0 0 8px; font-size: 18px; }
+.order-info p { margin: 6px 0; }
+.order-info .price { font-weight: 600; color: #1dbf73; }
+.order-actions { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
+.order-actions button, .review-form button, .delivery-form button { border: 0; border-radius: 4px; padding: 8px 10px; background: #1dbf73; color: white; cursor: pointer; }
+.order-actions button.danger { background: #d9534f; }
+.order-actions button:disabled, .review-form button:disabled, .delivery-form button:disabled { background: #9acfb4; cursor: not-allowed; }
+.delivery-box { padding: 15px 18px; border-top: 1px solid #eee; background: #fafafa; }
+.revision-box { background: #fffaf0; }
+.dispute-box { background: #fff4f4; border-left: 4px solid #d9534f; }
+.delivery-box p { margin: 8px 0; color: #555; line-height: 1.5; }
+.delivery-files { display: flex; gap: 8px; flex-wrap: wrap; }
+.delivery-files a, .delivery-files button { border: 1px solid #1dbf73; border-radius: 4px; padding: 7px 10px; color: #16864d; text-decoration: none; font-size: 14px; background: white; cursor: pointer; }
+.delivery-form { padding: 15px 18px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-direction: column; }
+.delivery-form textarea { width: 100%; min-height: 85px; padding: 8px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; resize: vertical; }
+.delivery-form input[type="number"] { padding: 9px; border: 1px solid #ddd; border-radius: 4px; }
+.delivery-form input[type="file"] { padding: 8px; border: 1px dashed #c9c9c9; border-radius: 4px; background: #fafafa; }
+.delivery-form small { color: #777; }
+.dispute-form { background: #fffafa; }
+.form-actions { display: flex; gap: 8px; }
+.form-error { margin: 0; color: #c0392b; font-size: 14px; }
+.order-timeline { padding: 15px 18px; border-top: 1px solid #eee; display: grid; gap: 12px; }
+.timeline-item { display: grid; grid-template-columns: 12px 1fr; gap: 10px; align-items: start; }
+.timeline-item .dot { width: 9px; height: 9px; border-radius: 50%; background: #1dbf73; margin-top: 6px; }
+.timeline-item p { margin: 0 0 4px; font-weight: 600; }
+.timeline-item small { display: block; color: #777; }
+.timeline-item em { display: block; margin-top: 5px; color: #555; font-style: normal; }
+.review-form { padding: 15px 18px; border-top: 1px solid #eee; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.review-form textarea { width: 100%; min-height: 70px; padding: 8px; }
+.review-form select { padding: 7px; }
+.review-form .muted, .delivery-form .muted { background: #777; }
 
-  .container {
-    width: 1200px;
-    padding: 50px 0;
-
-    .title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      button {
-        background-color: #1dbf73;
-        color: white;
-        font-weight: 500;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-      }
-    }
-
-    table {
-      width: 100%;
-
-      th {
-        text-align: left;
-      }
-      tr {
-        height: 50px;
-
-        &:nth-child(even) {
-          background-color: #1dbf730f;
-        }
-
-        td {
-          img {
-            width: 50px;
-            height: 25px;
-            object-fit: cover;
-          }
-          .msg {
-            width: 25px;
-            height: 25px;
-            cursor: pointer;
-          }
-        }
-      }
-    }
-  }
+@media (max-width: 900px) {
+  .orders .container { width: 100%; padding: 30px 16px; box-sizing: border-box; }
+  .order-stats { grid-template-columns: 1fr 1fr; }
+  .order-stepper { grid-template-columns: 1fr; }
+  .order-body { flex-direction: column; align-items: flex-start; }
+  .order-actions { justify-content: flex-start; }
 }

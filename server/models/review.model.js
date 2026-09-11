@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const ReviewModel = new mongoose.Schema(
   {
+    order: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      required: false,
+    },
     gig: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Gig",

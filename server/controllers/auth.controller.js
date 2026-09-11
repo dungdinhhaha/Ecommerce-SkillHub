@@ -9,6 +9,8 @@ const sendToken = (user, res, statusCode) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
   };
 
   res.status(statusCode).cookie("token", token, options).json({
@@ -22,7 +24,17 @@ const sendToken = (user, res, statusCode) => {
 
 exports.register = async (req, res, next) => {
   try {
-    const user = await User.create(req.body);
+    if (!req.body.termsAccepted) {
+      return next(createError(400, "Bạn cần đồng ý Điều khoản dịch vụ và Chính sách bảo mật để tạo tài khoản"));
+    }
+    const user = await User.create({
+      ...req.body,
+      legalConsent: {
+        termsAcceptedAt: new Date(),
+        privacyAcceptedAt: new Date(),
+        version: "2026-09",
+      },
+    });
     sendToken(user, res, 201);
   } catch (err) {
     next(err);
@@ -34,13 +46,20 @@ exports.login = async (req, res, next) => {
   if (!user || !(await user.isPasswordMatch(req.body.password))) {
     return next(createError(401, "Invalid username or password"));
   }
+  if (user.accountStatus === "blocked") {
+    return next(createError(403, "Tài khoản đã bị khóa bởi quản trị viên"));
+  }
   user.password = undefined;
   sendToken(user, res, 200);
 };
 
 exports.logout = async (req, res, next) => {
   return res
-    .clearCookie("token", { sameSite: "none", secure: true })
+    .clearCookie("token", {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+    })
     .status(200)
     .json({ success: true, data: { message: "User has been logged out" } });
 };

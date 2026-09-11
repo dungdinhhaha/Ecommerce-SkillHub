@@ -1,0 +1,16 @@
+{
+  "name": "SkillHub",
+  "short_name": "SkillHub",
+  "description": "Marketplace sản phẩm số và dịch vụ kỹ năng cho người dùng Việt Nam.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00451f",
+  "icons": [
+    {
+      "src": "/img/check.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}

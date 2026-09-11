@@ -1,32 +1,118 @@
+.cat-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cat-card-link:hover,
+.cat-card-link:focus {
+  color: inherit;
+  text-decoration: none;
+}
+
 .cat-card {
-  width: 230px;
-  height: 344px;
+  width: 100%;
+  height: 320px;
   color: white;
-  background-color: black;
-  border-radius: 5px;
+  border-radius: 22px;
   cursor: pointer;
   position: relative;
+  overflow: hidden;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #0f172a;
+  box-shadow: var(--sh-shadow-soft);
+}
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.5;
+.cat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 23, 0.03) 0%,
+    rgba(2, 6, 23, 0.08) 36%,
+    rgba(2, 6, 23, 0.74) 100%
+  );
+  z-index: 1;
+}
+
+.cat-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+  filter: saturate(1.05) contrast(1.02);
+  transform: scale(1.01);
+}
+
+.cat-card .icon,
+.cat-card .title,
+.cat-card .desc {
+  position: relative;
+  z-index: 2;
+}
+
+.cat-card .icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(8px);
+  font-size: 26px;
+}
+
+.cat-card .title {
+  font-weight: 900;
+  font-size: clamp(24px, 7vw, 28px);
+  line-height: 1.1;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  text-shadow: 0 3px 18px rgba(0,0,0,.42);
+}
+
+.cat-card .desc {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.45;
+  color: rgba(255,255,255,.86);
+  text-decoration: none;
+  text-shadow: 0 2px 12px rgba(0,0,0,.34);
+}
+
+@media (max-width: 768px) {
+  .cat-card {
+    height: 250px;
+    padding: 18px;
+    border-radius: 20px;
   }
 
-  .desc {
-    font-weight: 400;
-    font-size: 15px;
-    position: absolute;
-    top: 15px;
-    left: 15px;
+  .cat-card .icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    font-size: 22px;
   }
 
-  .title {
-    font-weight: 500;
-    font-size: 24px;
-    position: absolute;
-    top: 40px;
-    left: 15px;
+  .cat-card .desc {
+    font-size: 14px;
   }
 }
+
+.cat-design { background: #3b0764; }
+.cat-writing { background: #78350f; }
+.cat-video { background: #0c4a6e; }
+.cat-education { background: #14532d; }
+.cat-web { background: #0f172a; }
