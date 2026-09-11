@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   .container {
-    width: 1000px;
+    width: min(1000px, calc(100% - 32px));
     margin: 50px;
     .breadcrumbs {
       font-size: 13px;

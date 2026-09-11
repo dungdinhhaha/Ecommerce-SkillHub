@@ -4,6 +4,22 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg,
+iframe {
+  max-width: 100%;
+}
+
 :root {
   --sh-primary: #16c784;
   --sh-primary-dark: #065f46;
@@ -26,6 +42,7 @@ body {
   font-family: "Montserrat", sans-serif;
   color: var(--sh-ink);
   background: #fff;
+  overflow-wrap: anywhere;
 }
 
 button,
@@ -64,6 +81,12 @@ textarea:focus-visible {
 .sh-container {
   width: min(1200px, calc(100% - 32px));
   margin: 0 auto;
+}
+
+@media (max-width: 560px) {
+  .sh-container {
+    width: min(100%, calc(100% - 24px));
+  }
 }
 
 .sh-card {

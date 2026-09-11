@@ -1,5 +1,5 @@
 .order-detail { display: flex; justify-content: center; min-height: 70vh; }
-.order-detail .container { width: 1200px; padding: 45px 0; display: grid; gap: 18px; }
+.order-detail .container { width: min(1200px, calc(100% - 32px)); padding: 45px 0; display: grid; gap: 18px; }
 .order-detail a { color: #1dbf73; text-decoration: none; }
 .order-detail-head { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; }
 .order-detail-head h1 { margin: 0 0 8px; }

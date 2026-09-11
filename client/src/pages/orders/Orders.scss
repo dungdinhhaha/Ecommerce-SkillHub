@@ -1,5 +1,5 @@
 .orders { display: flex; justify-content: center; background: linear-gradient(180deg, #fff, #f7faf9); }
-.orders .container { width: 1200px; padding: 50px 0; }
+.orders .container { width: min(1200px, calc(100% - 32px)); padding: 50px 0; }
 .orders .title { display: flex; justify-content: space-between; align-items: center; }
 .orders .title span { color: #777; }
 .orders-hint { color: #666; margin: 8px 0 18px; }

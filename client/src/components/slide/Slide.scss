@@ -3,6 +3,7 @@
   justify-content: center;
   padding: 72px 0;
   overflow: hidden;
+  max-width: 100%;
 }
 
 .slide .container {
@@ -19,6 +20,9 @@
   padding: 4px 4px 18px;
   scroll-snap-type: x mandatory;
   scrollbar-width: thin;
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .slider-track > * {
@@ -31,8 +35,9 @@
   }
 
   .slide .container {
-    width: 100%;
-    padding-left: 16px;
+    width: min(100%, calc(100% - 24px));
+    padding-left: 0;
+    overflow: hidden;
   }
 
   .slider-track {

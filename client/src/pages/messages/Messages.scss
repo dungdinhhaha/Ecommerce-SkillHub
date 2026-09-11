@@ -3,7 +3,7 @@
   justify-content: center;
 
   .container {
-    width: 1200px;
+    width: min(1200px, calc(100% - 32px));
     padding: 50px 0;
 
     .title {

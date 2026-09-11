@@ -1,5 +1,5 @@
 .wishlist { display: flex; justify-content: center; min-height: 70vh; }
-.wishlist .container { width: 1200px; padding: 45px 0; }
+.wishlist .container { width: min(1200px, calc(100% - 32px)); padding: 45px 0; }
 .wishlist .title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
 .wishlist .title span, .wishlist .empty p { color: #666; }
 .wishlist-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }

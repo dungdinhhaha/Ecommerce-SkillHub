@@ -1,5 +1,5 @@
 .library { display: flex; justify-content: center; }
-.library .container { width: 1200px; padding: 50px 0; }
+.library .container { width: min(1200px, calc(100% - 32px)); padding: 50px 0; }
 .library .title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
 .library .title span { color: #777; }
 .library-grid { display: grid; gap: 14px; }
