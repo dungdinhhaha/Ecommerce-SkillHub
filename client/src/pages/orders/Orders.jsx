@@ -19,6 +19,8 @@ const Orders = () => {
   const [disputing, setDisputing] = useState(null);
   const [searchDraft, setSearchDraft] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [openOrderId, setOpenOrderId] = useState("");
   const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
   const { data = [], isLoading, isError } = useQuery({
     queryKey: ["orders", searchTerm],
@@ -56,6 +58,7 @@ const Orders = () => {
     acc[order.status] = (acc[order.status] || 0) + 1;
     return acc;
   }, {});
+  const filteredOrders = statusFilter === "all" ? data : data.filter((order) => order.status === statusFilter);
   const actionHint = currentUser.isSeller
     ? "Theo dõi đơn cần bàn giao, đơn buyer yêu cầu sửa và đơn đang tranh chấp."
     : "Theo dõi đơn đã mua, tải sản phẩm số, xác nhận hoàn thành hoặc yêu cầu hỗ trợ.";
@@ -66,7 +69,7 @@ const Orders = () => {
   };
 
   return <div className="orders"><div className="container">
-    <div className="title"><h1>{currentUser.isSeller ? "Trung tâm đơn của talent" : "Trung tâm mua hàng"}</h1><span>{data.length} đơn</span></div>
+    <div className="title"><h1>{currentUser.isSeller ? "Trung tâm đơn của talent" : "Trung tâm mua hàng"}</h1><span>{filteredOrders.length}/{data.length} đơn</span></div>
     <p className="orders-hint">{actionHint}</p>
     <div className="orders-search">
       <input
@@ -80,51 +83,72 @@ const Orders = () => {
     </div>
     {searchTerm && <p className="orders-search-note">Đang tìm: “{searchTerm}”</p>}
     <div className="order-stats">
+      <article className={statusFilter === "all" ? "active" : ""} onClick={() => setStatusFilter("all")}>
+        <small>Tất cả đơn</small>
+        <strong>{data.length}</strong>
+      </article>
       {Object.entries(statusLabels).map(([status, label]) => <article key={status}>
+        <button type="button" className={statusFilter === status ? "active" : ""} onClick={() => setStatusFilter(status)}>
         <small>{label}</small>
         <strong>{stats[status] || 0}</strong>
+        </button>
       </article>)}
     </div>
-    {!data.length && <p>Bạn chưa có đơn hàng đã thanh toán.</p>}
-    <div className="order-list">{data.map((order) => <article className="order-card" key={order._id}>
-      <div className="order-head"><div><strong>Mã đơn: {order.paymentCode}</strong><small>Được tạo: {new Date(order.createdAt).toLocaleString("vi-VN")}</small></div><span className={`status ${order.status}`}>{statusLabels[order.status] || order.status}</span></div>
-      <OrderStepper status={order.status} />
-      <div className="order-body"><img className="image" src={order.gig?.cover || "/img/noavatar.png"} alt="" /><div className="order-info"><h2>{order.gig?.title}</h2><p>{currentUser.isSeller ? "Người mua" : "Talent"}: {currentUser.isSeller ? order.buyer?.username : order.seller?.username}</p><p className="price">{Number(order.price).toLocaleString("vi-VN")} VND</p>{order.sepayTransactionId && <small>Mã giao dịch SePay: {order.sepayTransactionId}</small>}</div>
-        <div className="order-actions"><button onClick={() => navigate(`/orders/${order._id}`)}>Chi tiết</button><button onClick={() => handleContact(order)}>Nhắn tin</button>{currentUser.isSeller && ["in_progress", "revision_requested"].includes(order.status) && <button onClick={() => setDelivering(order)}>Gửi kết quả</button>}{!currentUser.isSeller && order.status === "submitted" && <><button onClick={() => action.mutate({ type: "complete", id: order._id })}>Xác nhận hoàn thành</button><button onClick={() => setRevising(order)}>Yêu cầu chỉnh sửa</button></>}{!currentUser.isSeller && ["in_progress", "submitted", "revision_requested", "completed"].includes(order.status) && <button className="danger" onClick={() => setDisputing(order)}>Yêu cầu hoàn tiền</button>}{!currentUser.isSeller && order.gig?.listingType === "digital_product" && <button onClick={async () => { const res = await request.get(`/gigs/order/${order._id}/download`); window.open(res.data.data.url, "_blank"); }}>Tải sản phẩm</button>}{!currentUser.isSeller && order.status === "completed" && <button onClick={() => setReviewing(order)}>Đánh giá</button>}</div>
-      </div>
-      {(order.disputeReason || order.disputeFiles?.length > 0) && <div className="delivery-box dispute-box">
+    {!filteredOrders.length && <p>{data.length ? "Không có đơn nào trong trạng thái này." : "Bạn chưa có đơn hàng đã thanh toán."}</p>}
+    <div className="order-list">{filteredOrders.map((order) => {
+      const isOpen = openOrderId === order._id;
+      return <article className={`order-card ${isOpen ? "open" : ""}`} key={order._id}>
+      <button type="button" className="order-summary" onClick={() => setOpenOrderId(isOpen ? "" : order._id)}>
+        <img className="image" src={order.gig?.cover || "/img/noavatar.png"} alt="" />
+        <div>
+          <strong>{order.gig?.title || "Đơn hàng"}</strong>
+          <span>Mã {order.paymentCode} · {currentUser.isSeller ? "Buyer" : "Talent"}: {currentUser.isSeller ? order.buyer?.username : order.seller?.username}</span>
+          <small>{order.sepayTransactionId ? `SePay: ${order.sepayTransactionId}` : `Tạo: ${new Date(order.createdAt).toLocaleString("vi-VN")}`}</small>
+        </div>
+        <div className="summary-right">
+          <b>{Number(order.price).toLocaleString("vi-VN")} VND</b>
+          <span className={`status ${order.status}`}>{statusLabels[order.status] || order.status}</span>
+        </div>
+      </button>
+      {isOpen && <>
+        <div className="order-head"><div><strong>Mã đơn: {order.paymentCode}</strong><small>Được tạo: {new Date(order.createdAt).toLocaleString("vi-VN")}</small></div><span className={`status ${order.status}`}>{statusLabels[order.status] || order.status}</span></div>
+        <OrderStepper status={order.status} />
+        <div className="order-body"><img className="image" src={order.gig?.cover || "/img/noavatar.png"} alt="" /><div className="order-info"><h2>{order.gig?.title}</h2><p>{currentUser.isSeller ? "Người mua" : "Talent"}: {currentUser.isSeller ? order.buyer?.username : order.seller?.username}</p><p className="price">{Number(order.price).toLocaleString("vi-VN")} VND</p>{order.sepayTransactionId && <small>Mã giao dịch SePay: {order.sepayTransactionId}</small>}</div>
+          <div className="order-actions"><button onClick={() => navigate(`/orders/${order._id}`)}>Chi tiết</button><button onClick={() => handleContact(order)}>Nhắn tin</button>{currentUser.isSeller && ["in_progress", "revision_requested"].includes(order.status) && <button onClick={() => setDelivering(order)}>Gửi kết quả</button>}{!currentUser.isSeller && order.status === "submitted" && <><button onClick={() => action.mutate({ type: "complete", id: order._id })}>Xác nhận hoàn thành</button><button onClick={() => setRevising(order)}>Yêu cầu chỉnh sửa</button></>}{!currentUser.isSeller && ["in_progress", "submitted", "revision_requested", "completed"].includes(order.status) && <button className="danger" onClick={() => setDisputing(order)}>Yêu cầu hoàn tiền</button>}{!currentUser.isSeller && order.gig?.listingType === "digital_product" && <button onClick={async () => { const res = await request.get(`/gigs/order/${order._id}/download`); window.open(res.data.data.url, "_blank"); }}>Tải sản phẩm</button>}{!currentUser.isSeller && order.status === "completed" && <button onClick={() => setReviewing(order)}>Đánh giá</button>}</div>
+        </div>
+        {(order.disputeReason || order.disputeFiles?.length > 0) && <div className="delivery-box dispute-box">
         <strong>Yêu cầu hoàn tiền / tranh chấp</strong>
         {order.disputeReason && <p>{order.disputeReason}</p>}
         {order.disputeFiles?.length > 0 && <div className="delivery-files">{order.disputeFiles.map((fileUrl, index) => <a href={fileUrl} target="_blank" rel="noreferrer" key={fileUrl}>Bằng chứng {index + 1}</a>)}</div>}
-      </div>}
-      {(order.buyerNote || order.revisionFiles?.length > 0) && <div className="delivery-box revision-box">
+        </div>}
+        {(order.buyerNote || order.revisionFiles?.length > 0) && <div className="delivery-box revision-box">
         <strong>Yêu cầu chỉnh sửa gần nhất</strong>
         {order.buyerNote && <p>{order.buyerNote}</p>}
         {order.revisionFiles?.length > 0 && <div className="delivery-files">{order.revisionFiles.map((fileUrl, index) => <a href={fileUrl} target="_blank" rel="noreferrer" key={fileUrl}>File góp ý {index + 1}</a>)}</div>}
-      </div>}
-      {(order.deliveryNote || order.deliveryFiles?.length > 0) && <div className="delivery-box">
+        </div>}
+        {(order.deliveryNote || order.deliveryFiles?.length > 0) && <div className="delivery-box">
         <strong>Kết quả bàn giao</strong>
         {order.deliveryNote && <p>{order.deliveryNote}</p>}
         {order.deliveryFiles?.length > 0 && <div className="delivery-files">{order.deliveryFiles.map((fileUrl, index) => <button type="button" onClick={() => openDeliveryFile(order._id, index)} key={fileUrl}>Tải file {index + 1}</button>)}</div>}
-      </div>}
-      {order.timeline?.length > 0 && <Timeline items={order.timeline} />}
-      {delivering?._id === order._id && <DeliveryForm
+        </div>}
+        {order.timeline?.length > 0 && <Timeline items={order.timeline} />}
+        {delivering?._id === order._id && <DeliveryForm
         isSubmitting={action.isLoading}
         onCancel={() => setDelivering(null)}
         onSubmit={(values) => action.mutate(
           { type: "delivery", id: order._id, ...values },
           { onSuccess: () => setDelivering(null) }
         )}
-      />}
-      {revising?._id === order._id && <RevisionForm
+        />}
+        {revising?._id === order._id && <RevisionForm
         isSubmitting={action.isLoading}
         onCancel={() => setRevising(null)}
         onSubmit={(values) => action.mutate(
           { type: "revision", id: order._id, ...values },
           { onSuccess: () => setRevising(null) }
         )}
-      />}
-      {disputing?._id === order._id && <RefundForm
+        />}
+        {disputing?._id === order._id && <RefundForm
         order={order}
         isSubmitting={action.isLoading}
         onCancel={() => setDisputing(null)}
@@ -132,9 +156,11 @@ const Orders = () => {
           { type: "refund", id: order._id, ...values },
           { onSuccess: () => setDisputing(null) }
         )}
-      />}
-      {reviewing?._id === order._id && <ReviewForm onCancel={() => setReviewing(null)} onSubmit={(values) => review.mutate({ order, ...values })} />}
-    </article>)}</div>
+        />}
+        {reviewing?._id === order._id && <ReviewForm onCancel={() => setReviewing(null)} onSubmit={(values) => review.mutate({ order, ...values })} />}
+      </>}
+    </article>;
+    })}</div>
   </div></div>;
 };
 
