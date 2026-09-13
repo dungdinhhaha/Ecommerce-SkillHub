@@ -88,6 +88,21 @@
         }
       }
 
+      .talent-name-link {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: inherit;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .talent-name-link:hover {
+        color: var(--sh-primary-dark);
+        text-decoration: underline;
+      }
+
       .slider {
         background-color: transparent;
         img {

@@ -113,7 +113,7 @@ const Gig = () => {
                 src={data.userId.img || "/img/noavatar.png"}
                 alt=""
               />
-              <span>{data.userId.username}</span>
+              <button type="button" className="talent-name-link" onClick={() => navigate(`/talents/${data.userId._id}`)}>{data.userId.username}</button>
               {rating ? (
                 <div className="stars">
                   {Array(roundedRating)
@@ -154,7 +154,7 @@ const Gig = () => {
                   alt=""
                 />
                 <div className="info">
-                  <span>{data.userId.username}</span>
+                  <button type="button" className="talent-name-link" onClick={() => navigate(`/talents/${data.userId._id}`)}>{data.userId.username}</button>
                   {rating ? (
                     <div className="stars">
                       {Array(roundedRating)

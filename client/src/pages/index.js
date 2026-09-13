@@ -22,3 +22,4 @@ export { default as About } from "./about/About.jsx";
 export { default as Account } from "./account/Account.jsx";
 export { default as TalentVouchers } from "./talentVouchers/TalentVouchers.jsx";
 export { default as Cart } from "./cart/Cart.jsx";
+export { default as TalentProfile } from "./talentProfile/TalentProfile.jsx";

@@ -27,6 +27,7 @@ import {
   Account,
   TalentVouchers,
   Cart,
+  TalentProfile,
 } from "../pages";
 
 import { Navbar, Footer } from "../components";
@@ -75,6 +76,10 @@ const Routes = [
           {
             path: "/gig/:id",
             element: <Gig />,
+          },
+          {
+            path: "/talents/:id",
+            element: <TalentProfile />,
           },
           {
             path: "/messages",

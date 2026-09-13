@@ -1,8 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./GigCard.scss";
 
 const GigCard = ({ item }) => {
+  const navigate = useNavigate();
   const rating = item.starNumber ? Number(item.totalStars / item.starNumber).toFixed(1) : null;
   const isDigital = item.listingType === "digital_product";
   const promotion = item.promotion;
@@ -18,10 +19,10 @@ const GigCard = ({ item }) => {
           {promotion && <span className="sale-badge">-{promotion.discountPercent}%</span>}
         </div>
         <div className="info">
-          <div className="user">
+          <button className="user talent-link" type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); navigate(`/talents/${item.userId._id}`); }}>
             <img src={item.userId.img || "/img/noavatar.png"} alt={item.userId.username || "Talent SkillHub"} onError={(e) => { e.currentTarget.src = "/img/noavatar.png"; }} />
             <span>{item.userId.username}</span>
-          </div>
+          </button>
           <h3>{item.title}</h3>
           <p>{item.shortDesc}</p>
           <div className="star">
