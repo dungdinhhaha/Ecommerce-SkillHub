@@ -17,9 +17,13 @@ const Orders = () => {
   const [delivering, setDelivering] = useState(null);
   const [revising, setRevising] = useState(null);
   const [disputing, setDisputing] = useState(null);
+  const [searchDraft, setSearchDraft] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
   const { data = [], isLoading, isError } = useQuery({
-    queryKey: ["orders"], queryFn: () => request.get("/gigs/order").then((res) => res.data.data),
+    queryKey: ["orders", searchTerm],
+    queryFn: () => request.get("/gigs/order", { params: searchTerm ? { q: searchTerm } : {} }).then((res) => res.data.data),
+    keepPreviousData: true,
   });
   const action = useMutation({
     mutationFn: ({ type, id, note, files }) => request({
@@ -55,10 +59,26 @@ const Orders = () => {
   const actionHint = currentUser.isSeller
     ? "Theo dõi đơn cần bàn giao, đơn buyer yêu cầu sửa và đơn đang tranh chấp."
     : "Theo dõi đơn đã mua, tải sản phẩm số, xác nhận hoàn thành hoặc yêu cầu hỗ trợ.";
+  const applySearch = () => setSearchTerm(searchDraft.trim());
+  const clearSearch = () => {
+    setSearchDraft("");
+    setSearchTerm("");
+  };
 
   return <div className="orders"><div className="container">
     <div className="title"><h1>{currentUser.isSeller ? "Trung tâm đơn của talent" : "Trung tâm mua hàng"}</h1><span>{data.length} đơn</span></div>
     <p className="orders-hint">{actionHint}</p>
+    <div className="orders-search">
+      <input
+        value={searchDraft}
+        onChange={(e) => setSearchDraft(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") applySearch(); }}
+        placeholder={currentUser.isSeller ? "Tìm mã đơn, tên/email buyer, tên sản phẩm, mã SePay..." : "Tìm mã đơn, talent, tên sản phẩm, mã SePay..."}
+      />
+      <button onClick={applySearch}>Tìm đơn</button>
+      <button className="muted" onClick={clearSearch}>Xóa</button>
+    </div>
+    {searchTerm && <p className="orders-search-note">Đang tìm: “{searchTerm}”</p>}
     <div className="order-stats">
       {Object.entries(statusLabels).map(([status, label]) => <article key={status}>
         <small>{label}</small>

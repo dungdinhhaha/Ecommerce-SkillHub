@@ -163,14 +163,42 @@ const getCloudinaryDownloadUrl = (url) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({
+    const baseFilter = {
       ...(req.user.isSeller ? { seller: req.user.id } : { buyer: req.user.id }),
       paymentStatus: "paid",
-    })
+    };
+    const q = String(req.query.q || "").trim();
+    if (q) {
+      const [users, gigs] = await Promise.all([
+        User.find({
+          $or: [
+            { username: { $regex: q, $options: "i" } },
+            { email: { $regex: q, $options: "i" } },
+          ],
+        }).select("_id"),
+        Gig.find({
+          $or: [
+            { title: { $regex: q, $options: "i" } },
+            { shortTitle: { $regex: q, $options: "i" } },
+          ],
+        }).select("_id"),
+      ]);
+      const userIds = users.map((user) => user._id);
+      const gigIds = gigs.map((gig) => gig._id);
+      const searchOr = [
+        { paymentCode: { $regex: q, $options: "i" } },
+        { sepayTransactionId: { $regex: q, $options: "i" } },
+      ];
+      if (/^[a-f\d]{24}$/i.test(q)) searchOr.push({ _id: q }, { buyer: q }, { seller: q }, { gig: q });
+      if (userIds.length) searchOr.push({ buyer: { $in: userIds } }, { seller: { $in: userIds } });
+      if (gigIds.length) searchOr.push({ gig: { $in: gigIds } });
+      baseFilter.$or = searchOr;
+    }
+    const orders = await Order.find(baseFilter)
       .sort({ paidAt: -1, createdAt: -1 })
       .populate("gig")
-      .populate("seller", "username country img")
-      .populate("buyer", "username country img");
+      .populate("seller", "username email country img")
+      .populate("buyer", "username email country img");
     return res.status(200).json({
       status: "success",
       data: orders,

@@ -3,6 +3,11 @@
 .orders .title { display: flex; justify-content: space-between; align-items: center; }
 .orders .title span { color: #777; }
 .orders-hint { color: #666; margin: 8px 0 18px; }
+.orders-search { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 18px; }
+.orders-search input { flex: 1 1 420px; min-height: 46px; padding: 0 14px; border: 1px solid var(--sh-border); border-radius: 14px; font-family: inherit; }
+.orders-search button { min-height: 46px; border: 0; border-radius: 999px; padding: 0 18px; background: var(--sh-primary); color: white; font-weight: 800; cursor: pointer; }
+.orders-search button.muted { background: #64748b; }
+.orders-search-note { margin: -8px 0 14px; color: #64748b; font-weight: 700; font-size: 13px; }
 .order-stats { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin: 18px 0 6px; }
 .order-stats article { border: 1px solid var(--sh-border); border-radius: 16px; padding: 14px; background: white; display: grid; gap: 6px; box-shadow: var(--sh-shadow-soft); }
 .order-stats small { color: #666; }
@@ -63,4 +68,5 @@
   .order-stepper { grid-template-columns: 1fr; }
   .order-body { flex-direction: column; align-items: flex-start; }
   .order-actions { justify-content: flex-start; }
+  .orders-search input, .orders-search button { width: 100%; }
 }
