@@ -108,11 +108,13 @@ const Gig = () => {
             {promotion && <span className="listing-badge sale">Đang khuyến mãi -{promotion.discountPercent}% · {promotion.title}</span>}
             <h1>{data.title}</h1>
             <div className="user">
-              <img
-                className="pp"
-                src={data.userId.img || "/img/noavatar.png"}
-                alt=""
-              />
+              <button type="button" className="talent-avatar-link" onClick={() => navigate(`/talents/${data.userId._id}`)}>
+                <img
+                  className="pp"
+                  src={data.userId.img || "/img/noavatar.png"}
+                  alt=""
+                />
+              </button>
               <button type="button" className="talent-name-link" onClick={() => navigate(`/talents/${data.userId._id}`)}>{data.userId.username}</button>
               {rating ? (
                 <div className="stars">
@@ -149,10 +151,12 @@ const Gig = () => {
             <div className="seller">
               <h2>Thông tin talent</h2>
               <div className="user">
-                <img
-                  src={data.userId.img ? data.userId.img : "/img/noavatar.png"}
-                  alt=""
-                />
+                <button type="button" className="talent-avatar-link" onClick={() => navigate(`/talents/${data.userId._id}`)}>
+                  <img
+                    src={data.userId.img ? data.userId.img : "/img/noavatar.png"}
+                    alt=""
+                  />
+                </button>
                 <div className="info">
                   <button type="button" className="talent-name-link" onClick={() => navigate(`/talents/${data.userId._id}`)}>{data.userId.username}</button>
                   {rating ? (

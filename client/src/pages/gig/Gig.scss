@@ -103,6 +103,15 @@
         text-decoration: underline;
       }
 
+      .talent-avatar-link {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        display: inline-flex;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
       .slider {
         background-color: transparent;
         img {
@@ -168,8 +177,15 @@
 
         > div {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
           gap: 18px;
+        }
+
+        .link,
+        .gig-card {
+          width: 100%;
+          max-width: none;
+          min-width: 0;
         }
       }
 
