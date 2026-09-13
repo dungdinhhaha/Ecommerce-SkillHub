@@ -13,7 +13,7 @@ const TalentProfile = () => {
   const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
   const { data, isLoading, isError } = useQuery({
     queryKey: ["talent-profile", id],
-    queryFn: () => request.get(`/users/${id}/profile`).then((res) => res.data.data),
+    queryFn: () => request.get(`/user/${id}/profile`).then((res) => res.data.data),
   });
 
   const contact = useMutation({

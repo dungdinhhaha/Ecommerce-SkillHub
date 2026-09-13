@@ -111,6 +111,7 @@ app.use((req, res, next) => {
 // mount routes
 app.use("/api/auth", authRateLimit, authRouter);
 app.use("/api/user", userRotuer);
+app.use("/api/users", userRotuer);
 app.use("/api/gigs", gigRouter);
 app.use("/api/conversation", conversationRouter);
 app.use("/api/admin", adminRouter);
