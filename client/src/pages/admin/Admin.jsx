@@ -38,7 +38,8 @@ const replacePagedItem = (old, updated, variables) => {
 
 const Admin = () => {
   const [tab, setTab] = useState("dashboard");
-  const [filters, setFilters] = useState({ status: "", from: "", to: "" });
+  const [filters, setFilters] = useState({ status: "", from: "", to: "", q: "" });
+  const [orderSearchDraft, setOrderSearchDraft] = useState("");
   const [productFilters, setProductFilters] = useState({ status: "", type: "", cat: "", search: "" });
   const [productSearchDraft, setProductSearchDraft] = useState("");
   const [productPage, setProductPage] = useState(1);
@@ -108,16 +109,25 @@ const Admin = () => {
   const review = useMutation({
     mutationFn: ({ id, status }) => request.patch(`/admin/listings/${id}`, { status }),
     onSuccess: (res, variables) => {
-      const updated = res.data.data;
-      queryClient.setQueriesData({ queryKey: ["admin-listings"] }, (old) => replacePagedItem(old, updated, variables));
-      queryClient.setQueriesData({ queryKey: ["admin-products"] }, (old) => replacePagedItem(old, updated, variables));
+      const label = approvalLabels[variables.status] || variables.status;
+      alert(`Đã cập nhật listing: ${label}`);
+      queryClient.invalidateQueries({ queryKey: ["admin-listings"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+    },
+    onError: (err) => {
+      alert(err.response?.data?.message || "Không cập nhật được listing. Vui lòng thử lại.");
     },
   });
   const updateOrder = useMutation({
     mutationFn: ({ id, status, adminNote }) => request.patch(`/admin/orders/${id}`, { status, adminNote }),
-    onSuccess: () => {
+    onSuccess: (res, variables) => {
+      alert(`Đã cập nhật đơn hàng: ${labels[variables.status] || variables.status}`);
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-disputes"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
+    },
+    onError: (err) => {
+      alert(err.response?.data?.message || "Không cập nhật được đơn hàng. Vui lòng thử lại.");
     },
   });
   const updateWithdrawal = useMutation({
@@ -215,7 +225,7 @@ const Admin = () => {
         {tab === "categories" && <CategoriesPanel query={categories} form={categoryForm} setForm={setCategoryForm} createCategory={createCategory} updateCategory={updateCategory} />}
         {tab === "vouchers" && <VouchersPanel query={vouchers} form={voucherForm} setForm={setVoucherForm} createVoucher={createVoucher} updateVoucher={updateVoucher} />}
         {tab === "users" && <UsersPanel query={users} filters={userFilters} setFilters={setUserFilters} searchDraft={userSearchDraft} setSearchDraft={setUserSearchDraft} updateUser={updateUser} />}
-        {tab === "orders" && <OrdersPanel orders={orders} filters={filters} setFilters={setFilters} adminNotes={adminNotes} setAdminNotes={setAdminNotes} updateOrder={updateOrder} createRefund={createRefund} />}
+        {tab === "orders" && <OrdersPanel orders={orders} filters={filters} setFilters={setFilters} searchDraft={orderSearchDraft} setSearchDraft={setOrderSearchDraft} adminNotes={adminNotes} setAdminNotes={setAdminNotes} updateOrder={updateOrder} createRefund={createRefund} />}
         {tab === "disputes" && <DisputesPanel query={disputes} adminNotes={adminNotes} setAdminNotes={setAdminNotes} updateOrder={updateOrder} createRefund={createRefund} />}
         {tab === "withdrawals" && <WithdrawalsPanel query={withdrawals} filter={withdrawalFilter} setFilter={setWithdrawalFilter} adminNotes={adminNotes} setAdminNotes={setAdminNotes} updateWithdrawal={updateWithdrawal} />}
         {tab === "refunds" && <RefundsPanel query={refunds} filter={refundFilter} setFilter={setRefundFilter} adminNotes={adminNotes} setAdminNotes={setAdminNotes} updateRefund={updateRefund} />}
@@ -499,18 +509,35 @@ const DisputesPanel = ({ query, adminNotes, setAdminNotes, updateOrder, createRe
   </div>;
 };
 
-const OrdersPanel = ({ orders, filters, setFilters, adminNotes, setAdminNotes, updateOrder, createRefund }) => <>
-  <div className="admin-filters">
-    <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
-      <option value="">Tất cả trạng thái</option>
-      {Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-    </select>
-    <input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
-    <input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
-    <button onClick={() => setFilters({ status: "", from: "", to: "" })}>Xóa lọc</button>
-  </div>
-  {orders.isLoading ? <p>Đang tải...</p> : !orders.data?.length ? <p>Chưa có đơn hàng.</p> : <div className="admin-orders">{orders.data.map((order) => <AdminOrderCard key={order._id} order={order} adminNotes={adminNotes} setAdminNotes={setAdminNotes} updateOrder={updateOrder} createRefund={createRefund} />)}</div>}
-</>;
+const OrdersPanel = ({ orders, filters, setFilters, searchDraft, setSearchDraft, adminNotes, setAdminNotes, updateOrder, createRefund }) => {
+  const applySearch = () => setFilters({ ...filters, q: searchDraft.trim() });
+  const clearFilters = () => {
+    setSearchDraft("");
+    setFilters({ status: "", from: "", to: "", q: "" });
+  };
+
+  return <>
+    <div className="admin-filters">
+      <input
+        className="admin-search-wide"
+        placeholder="Tìm mã đơn, Gmail buyer/talent, ID khách, ID talent"
+        value={searchDraft}
+        onChange={(e) => setSearchDraft(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") applySearch(); }}
+      />
+      <button onClick={applySearch}>Tìm đơn</button>
+      <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
+        <option value="">Tất cả trạng thái</option>
+        {Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+      </select>
+      <input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+      <input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+      <button onClick={clearFilters}>Xóa lọc</button>
+    </div>
+    {filters.q && <p className="filter-note">Đang tìm đơn: “{filters.q}”</p>}
+    {orders.isLoading ? <p>Đang tải...</p> : !orders.data?.length ? <p>Chưa có đơn hàng phù hợp.</p> : <div className="admin-orders">{orders.data.map((order) => <AdminOrderCard key={order._id} order={order} adminNotes={adminNotes} setAdminNotes={setAdminNotes} updateOrder={updateOrder} createRefund={createRefund} />)}</div>}
+  </>;
+};
 
 const AdminOrderCard = ({ order, adminNotes, setAdminNotes, updateOrder, createRefund }) => {
   const note = adminNotes[order._id] || order.adminNote || "";

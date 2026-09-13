@@ -6,6 +6,7 @@ const Refund = require("../models/refund.model");
 const Category = require("../models/category.model");
 const Voucher = require("../models/voucher.model");
 const createError = require("../utils/createError");
+const { isValidObjectId } = require("mongoose");
 
 const PAYOUT_HOLD_DAYS = Number(process.env.PAYOUT_HOLD_DAYS || 10);
 const getPayoutAvailableAt = (date = new Date()) =>
@@ -198,6 +199,25 @@ exports.getOrders = async (req, res, next) => {
     if (req.query.status) filter.status = req.query.status;
     if (req.query.buyer) filter.buyer = req.query.buyer;
     if (req.query.seller) filter.seller = req.query.seller;
+    const q = String(req.query.q || "").trim();
+    if (q) {
+      const userMatches = await User.find({
+        $or: [
+          { email: { $regex: q, $options: "i" } },
+          { username: { $regex: q, $options: "i" } },
+        ],
+      }).select("_id");
+      const userIds = userMatches.map((user) => user._id);
+      const searchOr = [
+        { paymentCode: { $regex: q, $options: "i" } },
+        { sepayTransactionId: { $regex: q, $options: "i" } },
+      ];
+      if (isValidObjectId(q)) {
+        searchOr.push({ _id: q }, { buyer: q }, { seller: q });
+      }
+      if (userIds.length) searchOr.push({ buyer: { $in: userIds } }, { seller: { $in: userIds } });
+      filter.$or = searchOr;
+    }
     if (req.query.from || req.query.to) {
       filter.createdAt = {};
       if (req.query.from) filter.createdAt.$gte = new Date(req.query.from);

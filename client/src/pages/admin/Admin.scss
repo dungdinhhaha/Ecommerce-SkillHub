@@ -40,6 +40,7 @@
 .admin-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 .admin-filters select, .admin-filters input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
 .admin-filters button { border: 0; border-radius: 4px; padding: 8px 12px; background: #777; color: white; cursor: pointer; }
+.admin-filters .admin-search-wide { min-width: min(420px, 100%); flex: 1 1 360px; }
 .filter-note { margin: -6px 0 8px; color: #666; }
 .admin-page-note { color: #64748b; font-size: 13px; font-weight: 700; margin: 0 0 12px; }
 .admin-pagination { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 18px 0 4px; }

@@ -9,6 +9,20 @@ import { useEffect } from "react";
 
 const PAGE_SIZE = 20;
 
+const normalizeGigsResponse = (payload, page) => {
+  const allItems = payload.data || [];
+  if (payload.pagination) return { items: allItems, pagination: payload.pagination };
+  return {
+    items: allItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    pagination: {
+      page,
+      limit: PAGE_SIZE,
+      total: allItems.length,
+      totalPages: Math.max(Math.ceil(allItems.length / PAGE_SIZE), 1),
+    },
+  };
+};
+
 const Gigs = () => {
   const [sort, setSort] = useState("createdAt");
   const { search } = useLocation();
@@ -37,7 +51,7 @@ const Gigs = () => {
       apiParams.set("limit", PAGE_SIZE);
       return request
         .get(`/gigs?${apiParams.toString()}`)
-        .then((res) => ({ items: res.data.data, pagination: res.data.pagination }));
+        .then((res) => normalizeGigsResponse(res.data, currentPage));
     },
     keepPreviousData: true,
   });
