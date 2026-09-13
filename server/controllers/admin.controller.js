@@ -11,6 +11,13 @@ const PAYOUT_HOLD_DAYS = Number(process.env.PAYOUT_HOLD_DAYS || 10);
 const getPayoutAvailableAt = (date = new Date()) =>
   new Date(new Date(date).getTime() + PAYOUT_HOLD_DAYS * 24 * 60 * 60 * 1000);
 
+const getPagination = (query, fallbackLimit = 20) => {
+  const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
+  const rawLimit = Number.parseInt(query.limit, 10) || fallbackLimit;
+  const limit = Math.min(Math.max(rawLimit, 1), 50);
+  return { page, limit, skip: (page - 1) * limit };
+};
+
 exports.getVouchers = async (req, res, next) => {
   try {
     const vouchers = await Voucher.find({}).sort({ createdAt: -1 }).populate("seller", "username email");
@@ -63,10 +70,18 @@ exports.getListingsForReview = async (req, res, next) => {
     if (req.query.type) filter.listingType = req.query.type;
     if (req.query.cat) filter.cat = req.query.cat;
     if (req.query.search) filter.title = { $regex: req.query.search, $options: "i" };
-    const listings = await Gig.find(filter.approvalStatus ? filter : { approvalStatus: "pending" })
+    const finalFilter = filter.approvalStatus ? filter : { approvalStatus: "pending" };
+    const { page, limit, skip } = getPagination(req.query);
+    const [listings, total] = await Promise.all([
+      Gig.find(finalFilter)
       .sort({ createdAt: -1 })
-      .populate("userId", "username email img");
-    res.status(200).json({ success: true, data: listings });
+      .skip(skip)
+      .limit(limit)
+      .select("title description shortDesc cover listingType cat price sales approvalStatus rejectionReason createdAt userId")
+      .populate("userId", "username email img"),
+      Gig.countDocuments(finalFilter),
+    ]);
+    res.status(200).json({ success: true, data: listings, pagination: { page, limit, total, totalPages: Math.max(Math.ceil(total / limit), 1) } });
   } catch (err) { next(err); }
 };
 
@@ -77,10 +92,17 @@ exports.getProducts = async (req, res, next) => {
     if (req.query.type) filter.listingType = req.query.type;
     if (req.query.cat) filter.cat = req.query.cat;
     if (req.query.search) filter.title = { $regex: req.query.search, $options: "i" };
-    const products = await Gig.find(filter)
+    const { page, limit, skip } = getPagination(req.query);
+    const [products, total] = await Promise.all([
+      Gig.find(filter)
       .sort({ createdAt: -1 })
-      .populate("userId", "username email img accountStatus");
-    res.status(200).json({ success: true, data: products });
+      .skip(skip)
+      .limit(limit)
+      .select("title shortDesc cover listingType cat price sales approvalStatus rejectionReason createdAt userId")
+      .populate("userId", "username email img accountStatus"),
+      Gig.countDocuments(filter),
+    ]);
+    res.status(200).json({ success: true, data: products, pagination: { page, limit, total, totalPages: Math.max(Math.ceil(total / limit), 1) } });
   } catch (err) { next(err); }
 };
 

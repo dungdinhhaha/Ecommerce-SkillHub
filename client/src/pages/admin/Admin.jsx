@@ -16,6 +16,7 @@ const moneyStatusLabels = { pending: "Chờ xử lý", approved: "Đã duyệt",
 const approvalLabels = { pending: "Chờ duyệt", approved: "Đã duyệt", rejected: "Từ chối" };
 const listingTypeLabels = { skill_service: "Dịch vụ kỹ năng", digital_product: "Sản phẩm số" };
 const accountStatusLabels = { active: "Đang hoạt động", blocked: "Đã khóa" };
+const ADMIN_PAGE_SIZE = 20;
 
 const money = (value) => Number(value || 0).toLocaleString("vi-VN");
 const dateTime = (value) => value ? new Date(value).toLocaleString("vi-VN") : "Chưa có";
@@ -27,10 +28,21 @@ const getMoneyStats = (items = []) => items.reduce((stats, item) => {
   return stats;
 }, { count: 0, total: 0, pending: 0, approved: 0, rejected: 0, paid: 0 });
 
+const replacePagedItem = (old, updated, variables) => {
+  if (!old?.items) return old;
+  return {
+    ...old,
+    items: old.items.map((item) => item._id === variables.id ? { ...item, ...updated, approvalStatus: variables.status } : item),
+  };
+};
+
 const Admin = () => {
   const [tab, setTab] = useState("dashboard");
   const [filters, setFilters] = useState({ status: "", from: "", to: "" });
   const [productFilters, setProductFilters] = useState({ status: "", type: "", cat: "", search: "" });
+  const [productSearchDraft, setProductSearchDraft] = useState("");
+  const [productPage, setProductPage] = useState(1);
+  const [listingPage, setListingPage] = useState(1);
   const [userFilters, setUserFilters] = useState({ role: "", status: "", search: "" });
   const [userSearchDraft, setUserSearchDraft] = useState("");
   const [withdrawalFilter, setWithdrawalFilter] = useState("");
@@ -41,9 +53,10 @@ const Admin = () => {
   const queryClient = useQueryClient();
 
   const listings = useQuery({
-    queryKey: ["admin-listings"],
-    queryFn: () => request.get("/admin/listings").then((res) => res.data.data),
+    queryKey: ["admin-listings", listingPage],
+    queryFn: () => request.get("/admin/listings", { params: { page: listingPage, limit: ADMIN_PAGE_SIZE } }).then((res) => ({ items: res.data.data, pagination: res.data.pagination })),
     enabled: tab === "listings",
+    keepPreviousData: true,
   });
   const dashboard = useQuery({
     queryKey: ["admin-dashboard"],
@@ -51,9 +64,10 @@ const Admin = () => {
     enabled: tab === "dashboard",
   });
   const products = useQuery({
-    queryKey: ["admin-products", productFilters],
-    queryFn: () => request.get("/admin/products", { params: productFilters }).then((res) => res.data.data),
+    queryKey: ["admin-products", productFilters, productPage],
+    queryFn: () => request.get("/admin/products", { params: { ...productFilters, page: productPage, limit: ADMIN_PAGE_SIZE } }).then((res) => ({ items: res.data.data, pagination: res.data.pagination })),
     enabled: tab === "products",
+    keepPreviousData: true,
   });
   const users = useQuery({
     queryKey: ["admin-users", userFilters],
@@ -93,7 +107,11 @@ const Admin = () => {
 
   const review = useMutation({
     mutationFn: ({ id, status }) => request.patch(`/admin/listings/${id}`, { status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-listings"] }),
+    onSuccess: (res, variables) => {
+      const updated = res.data.data;
+      queryClient.setQueriesData({ queryKey: ["admin-listings"] }, (old) => replacePagedItem(old, updated, variables));
+      queryClient.setQueriesData({ queryKey: ["admin-products"] }, (old) => replacePagedItem(old, updated, variables));
+    },
   });
   const updateOrder = useMutation({
     mutationFn: ({ id, status, adminNote }) => request.patch(`/admin/orders/${id}`, { status, adminNote }),
@@ -192,8 +210,8 @@ const Admin = () => {
         </header>
         {isError && <p className="admin-error">Bạn không có quyền truy cập hoặc máy chủ chưa sẵn sàng.</p>}
         {tab === "dashboard" && <DashboardPanel data={dashboard.data} isLoading={dashboard.isLoading} />}
-        {tab === "listings" && <ListingsPanel listings={listings} review={review} />}
-        {tab === "products" && <ProductsPanel query={products} filters={productFilters} setFilters={setProductFilters} review={review} />}
+        {tab === "listings" && <ListingsPanel listings={listings} review={review} page={listingPage} setPage={setListingPage} />}
+        {tab === "products" && <ProductsPanel query={products} filters={productFilters} setFilters={setProductFilters} searchDraft={productSearchDraft} setSearchDraft={setProductSearchDraft} page={productPage} setPage={setProductPage} review={review} />}
         {tab === "categories" && <CategoriesPanel query={categories} form={categoryForm} setForm={setCategoryForm} createCategory={createCategory} updateCategory={updateCategory} />}
         {tab === "vouchers" && <VouchersPanel query={vouchers} form={voucherForm} setForm={setVoucherForm} createVoucher={createVoucher} updateVoucher={updateVoucher} />}
         {tab === "users" && <UsersPanel query={users} filters={userFilters} setFilters={setUserFilters} searchDraft={userSearchDraft} setSearchDraft={setUserSearchDraft} updateUser={updateUser} />}
@@ -252,41 +270,67 @@ const RevenueChart = ({ items = [] }) => {
   </div>;
 };
 
-const ListingsPanel = ({ listings, review }) => {
-  if (listings.isLoading) return <p>Đang tải...</p>;
-  if (!listings.data?.length) return <p>Không có nội dung đang chờ duyệt.</p>;
+const AdminPagination = ({ pagination, onChange }) => {
+  if (!pagination || pagination.totalPages <= 1) return null;
+  const page = pagination.page || 1;
+  const start = Math.max(page - 2, 1);
+  const pages = Array.from({ length: Math.min(5, pagination.totalPages - start + 1) }, (_, index) => start + index);
+  return <div className="admin-pagination">
+    <button disabled={page <= 1} onClick={() => onChange(page - 1)}>Trước</button>
+    {pages.map((item) => <button className={item === page ? "active" : ""} onClick={() => onChange(item)} key={item}>{item}</button>)}
+    <button disabled={page >= pagination.totalPages} onClick={() => onChange(page + 1)}>Sau</button>
+  </div>;
+};
 
-  return <div className="admin-list">{listings.data.map((listing) => <article className="admin-card" key={listing._id}>
+const ListingsPanel = ({ listings, review, setPage }) => {
+  if (listings.isLoading) return <p>Đang tải...</p>;
+  const data = listings.data?.items || [];
+  const pagination = listings.data?.pagination;
+  if (!data.length) return <p>Không có nội dung đang chờ duyệt.</p>;
+
+  return <>
+    <div className="admin-page-note">Đang xem {data.length}/{pagination?.total || data.length} listing chờ duyệt · 20 listing/trang</div>
+    <div className="admin-list">{data.map((listing) => <article className="admin-card" key={listing._id}>
     <img src={listing.cover} alt="" />
     <div>
       <h2>{listing.title}</h2>
       <p>{listing.listingType === "digital_product" ? "Sản phẩm số" : "Dịch vụ kỹ năng"} · Người bán: {listing.userId?.username}</p>
-      <p>{listing.description}</p>
-      <button onClick={() => review.mutate({ id: listing._id, status: "approved" })}>Duyệt</button>
-      <button className="reject" onClick={() => review.mutate({ id: listing._id, status: "rejected" })}>Từ chối</button>
+      <p>{listing.shortDesc || listing.description}</p>
+      <button disabled={review.isLoading} onClick={() => review.mutate({ id: listing._id, status: "approved" })}>Duyệt</button>
+      <button disabled={review.isLoading} className="reject" onClick={() => review.mutate({ id: listing._id, status: "rejected" })}>Từ chối</button>
     </div>
-  </article>)}</div>;
+  </article>)}</div>
+    <AdminPagination pagination={pagination} onChange={setPage} />
+  </>;
 };
 
-const ProductsPanel = ({ query, filters, setFilters, review }) => {
-  const data = query.data || [];
+const ProductsPanel = ({ query, filters, setFilters, searchDraft, setSearchDraft, page, setPage, review }) => {
+  const data = query.data?.items || [];
+  const pagination = query.data?.pagination;
+  const updateFilters = (next) => {
+    setPage(1);
+    setFilters(next);
+  };
+  const applySearch = () => updateFilters({ ...filters, search: searchDraft.trim() });
   return <div className="admin-management">
     <div className="money-panel-head">
       <div><h2>Quản trị sản phẩm/dịch vụ</h2><p>Xem toàn bộ listing trên SkillHub, lọc theo trạng thái, loại sản phẩm và danh mục.</p></div>
     </div>
     <div className="admin-filters">
-      <input placeholder="Tìm theo tên sản phẩm/dịch vụ" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
-      <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
+      <input placeholder="Tìm theo tên sản phẩm/dịch vụ" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") applySearch(); }} />
+      <button onClick={applySearch}>Tìm</button>
+      <select value={filters.status} onChange={(e) => updateFilters({ ...filters, status: e.target.value })}>
         <option value="">Tất cả trạng thái</option>
         {Object.entries(approvalLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select>
-      <select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
+      <select value={filters.type} onChange={(e) => updateFilters({ ...filters, type: e.target.value })}>
         <option value="">Tất cả loại</option>
         {Object.entries(listingTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select>
-      <input placeholder="Danh mục, ví dụ: web/design" value={filters.cat} onChange={(e) => setFilters({ ...filters, cat: e.target.value })} />
-      <button onClick={() => setFilters({ status: "", type: "", cat: "", search: "" })}>Xóa lọc</button>
+      <input placeholder="Danh mục, ví dụ: web/design" value={filters.cat} onChange={(e) => updateFilters({ ...filters, cat: e.target.value })} />
+      <button onClick={() => { setSearchDraft(""); updateFilters({ status: "", type: "", cat: "", search: "" }); }}>Xóa lọc</button>
     </div>
+    <div className="admin-page-note">Đang xem {data.length}/{pagination?.total || data.length} listing · Trang {pagination?.page || page}/{pagination?.totalPages || 1}</div>
     {query.isLoading ? <p>Đang tải sản phẩm...</p> : !data.length ? <p>Chưa có sản phẩm/dịch vụ phù hợp.</p> : <div className="admin-table-list">
       {data.map((item) => <article className="product-row" key={item._id}>
         <img src={item.cover || "/img/noavatar.png"} alt="" />
@@ -298,12 +342,13 @@ const ProductsPanel = ({ query, filters, setFilters, review }) => {
         </div>
         <div className="row-actions">
           <span className={`pill ${item.approvalStatus}`}>{approvalLabels[item.approvalStatus] || item.approvalStatus}</span>
-          <button onClick={() => review.mutate({ id: item._id, status: "approved" })}>Duyệt</button>
-          <button className="reject" onClick={() => review.mutate({ id: item._id, status: "rejected" })}>Ẩn/Từ chối</button>
-          <button className="muted" onClick={() => review.mutate({ id: item._id, status: "pending" })}>Đưa về chờ duyệt</button>
+          <button disabled={review.isLoading} onClick={() => review.mutate({ id: item._id, status: "approved" })}>Duyệt</button>
+          <button disabled={review.isLoading} className="reject" onClick={() => review.mutate({ id: item._id, status: "rejected" })}>Ẩn/Từ chối</button>
+          <button disabled={review.isLoading} className="muted" onClick={() => review.mutate({ id: item._id, status: "pending" })}>Đưa về chờ duyệt</button>
         </div>
       </article>)}
     </div>}
+    <AdminPagination pagination={pagination} onChange={setPage} />
   </div>;
 };
 

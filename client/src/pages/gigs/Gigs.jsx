@@ -7,6 +7,8 @@ import SearchBox from "../../components/searchBox/SearchBox";
 import request from "../../utils/request.utils";
 import { useEffect } from "react";
 
+const PAGE_SIZE = 20;
+
 const Gigs = () => {
   const [sort, setSort] = useState("createdAt");
   const { search } = useLocation();
@@ -19,6 +21,7 @@ const Gigs = () => {
   const [minSales, setMinSales] = useState(params.get("minSales") || "");
   const [minPrice, setMinPrice] = useState(params.get("min") || "");
   const [maxPrice, setMaxPrice] = useState(params.get("max") || "");
+  const currentPage = Math.max(Number(params.get("page") || 1), 1);
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: () => request.get("/categories").then((res) => res.data.data),
@@ -26,13 +29,15 @@ const Gigs = () => {
   });
 
   const { data, isError, isLoading, isFetching } = useQuery({
-    queryKey: ["gigs", search, sort],
+    queryKey: ["gigs", search, sort, currentPage],
     queryFn: () => {
       const apiParams = new URLSearchParams(search);
       apiParams.set("sort", sort);
+      apiParams.set("page", currentPage);
+      apiParams.set("limit", PAGE_SIZE);
       return request
         .get(`/gigs?${apiParams.toString()}`)
-        .then((res) => res.data.data);
+        .then((res) => ({ items: res.data.data, pagination: res.data.pagination }));
     },
     keepPreviousData: true,
   });
@@ -61,10 +66,24 @@ const Gigs = () => {
     if (minSales) next.set("minSales", minSales);
     if (minPrice) next.set("min", minPrice);
     if (maxPrice) next.set("max", maxPrice);
+    next.set("page", "1");
     navigate(`/gigs?${next.toString()}`);
   };
 
-  const sortChangeHandler = (e) => setSort(e.target.value);
+  const sortChangeHandler = (e) => {
+    setSort(e.target.value);
+    const next = new URLSearchParams(search);
+    next.set("page", "1");
+    navigate(`/gigs?${next.toString()}`);
+  };
+  const gigs = data?.items || [];
+  const pagination = data?.pagination || { page: currentPage, total: gigs.length, totalPages: 1 };
+  const goToPage = (page) => {
+    const next = new URLSearchParams(search);
+    next.set("page", String(page));
+    navigate(`/gigs?${next.toString()}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const title = keyword || category || listingType ? "Kết quả tìm kiếm trên SkillHub" : "Khám phá sản phẩm và dịch vụ";
   const subtitle = [
@@ -143,16 +162,24 @@ const Gigs = () => {
           </div>
         </div>
         <div className="result-count">
-          <strong>{data?.length || 0}</strong> kết quả phù hợp
+          <strong>{pagination.total || gigs.length || 0}</strong> kết quả phù hợp
+          <span>Trang {pagination.page || 1}/{pagination.totalPages || 1} · {PAGE_SIZE} sản phẩm/trang</span>
           {isFetching && <span>Đang cập nhật...</span>}
         </div>
         <div className="cards">
-          {data && data.length > 0 ? (
-            data.map((gig) => <GigCard item={gig} key={gig._id} />)
+          {gigs.length > 0 ? (
+            gigs.map((gig) => <GigCard item={gig} key={gig._id} />)
           ) : (
             <div className="empty-state"><h3>Không tìm thấy kết quả phù hợp</h3><p>Thử bỏ bớt bộ lọc, dùng từ khóa ngắn hơn hoặc xem tất cả danh mục.</p><button onClick={() => navigate("/gigs")}>Xem tất cả</button></div>
           )}
         </div>
+        {(pagination.totalPages || 1) > 1 && <div className="pagination">
+          <button disabled={(pagination.page || 1) <= 1} onClick={() => goToPage((pagination.page || 1) - 1)}>Trước</button>
+          {Array.from({ length: pagination.totalPages }, (_, index) => index + 1).slice(Math.max((pagination.page || 1) - 3, 0), Math.max((pagination.page || 1) - 3, 0) + 5).map((page) => (
+            <button className={page === (pagination.page || 1) ? "active" : ""} onClick={() => goToPage(page)} key={page}>{page}</button>
+          ))}
+          <button disabled={(pagination.page || 1) >= (pagination.totalPages || 1)} onClick={() => goToPage((pagination.page || 1) + 1)}>Sau</button>
+        </div>}
       </div>
     </div>
   );

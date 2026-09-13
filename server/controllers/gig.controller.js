@@ -61,6 +61,13 @@ const attachPromotions = async (gigs) => {
   return Array.isArray(gigs) ? withPromotions : withPromotions[0];
 };
 
+const getPagination = (query, fallbackLimit = 20) => {
+  const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
+  const rawLimit = Number.parseInt(query.limit, 10) || fallbackLimit;
+  const limit = Math.min(Math.max(rawLimit, 1), 50);
+  return { page, limit, skip: (page - 1) * limit };
+};
+
 exports.addGig = async (req, res, next) => {
   try {
     if (!req.user.isSeller)
@@ -112,9 +119,16 @@ exports.getAllGigs = async (req, res, next) => {
       priceDesc: { price: -1 },
       rating: { totalStars: -1, starNumber: -1 },
     };
-    const gigs = await Gig.find(filters)
+    const shouldPaginate = req.query.page || req.query.limit;
+    const { page, limit, skip } = getPagination(req.query);
+    const query = Gig.find(filters)
       .sort(sortMap[sortKey] || sortMap.createdAt)
       .populate("userId", "username img");
+    if (shouldPaginate && sortKey !== "promotion" && req.query.promotion !== "true") query.skip(skip).limit(limit);
+    const [gigs, total] = await Promise.all([
+      query,
+      shouldPaginate ? Gig.countDocuments(filters) : Promise.resolve(0),
+    ]);
     let data = await attachPromotions(gigs);
     if (sortKey === "promotion") {
       data = data.sort((a, b) => {
@@ -123,6 +137,22 @@ exports.getAllGigs = async (req, res, next) => {
       });
     }
     if (req.query.promotion === "true") data = data.filter((gig) => gig.hasPromotion);
+    if (shouldPaginate && (sortKey === "promotion" || req.query.promotion === "true")) {
+      const filteredTotal = data.length;
+      data = data.slice(skip, skip + limit);
+      return res.status(200).json({
+        success: true,
+        data,
+        pagination: { page, limit, total: filteredTotal, totalPages: Math.max(Math.ceil(filteredTotal / limit), 1) },
+      });
+    }
+    if (shouldPaginate) {
+      return res.status(200).json({
+        success: true,
+        data,
+        pagination: { page, limit, total, totalPages: Math.max(Math.ceil(total / limit), 1) },
+      });
+    }
     res.status(200).json({ success: true, data });
   } catch (err) {
     next(err);

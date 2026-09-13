@@ -41,6 +41,11 @@
 .admin-filters select, .admin-filters input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
 .admin-filters button { border: 0; border-radius: 4px; padding: 8px 12px; background: #777; color: white; cursor: pointer; }
 .filter-note { margin: -6px 0 8px; color: #666; }
+.admin-page-note { color: #64748b; font-size: 13px; font-weight: 700; margin: 0 0 12px; }
+.admin-pagination { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 18px 0 4px; }
+.admin-pagination button { min-width: 42px; min-height: 40px; border-radius: 999px; border: 1px solid var(--sh-border); background: white; color: #0f172a; font-weight: 800; padding: 0 14px; cursor: pointer; }
+.admin-pagination button.active { background: var(--sh-primary); color: white; border-color: var(--sh-primary); }
+.admin-pagination button:disabled { opacity: .45; cursor: not-allowed; }
 .admin-management { display: grid; gap: 16px; }
 .admin-table-list { display: grid; gap: 12px; }
 .product-row, .user-row { display: grid; grid-template-columns: 110px 1fr auto; gap: 16px; align-items: center; border: 1px solid var(--sh-border); border-radius: 18px; padding: 14px; background: white; box-shadow: var(--sh-shadow-soft); }
