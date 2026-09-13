@@ -5,8 +5,6 @@ import GigCard from "../../components/gigCard/GigCard";
 import request from "../../utils/request.utils";
 import "./TalentProfile.scss";
 
-const money = (value) => Number(value || 0).toLocaleString("vi-VN");
-
 const TalentProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -51,7 +49,6 @@ const TalentProfile = () => {
         <article><small>Đơn đã thanh toán</small><strong>{stats.paidOrders}</strong><span>{stats.completedOrders} đơn hoàn thành</span></article>
         <article><small>Đơn đang xử lý</small><strong>{stats.activeOrders}</strong><span>Đang làm/sửa/tranh chấp</span></article>
         <article><small>Listing đang bán</small><strong>{stats.listings}</strong><span>{stats.totalSales || 0} lượt bán</span></article>
-        <article><small>Doanh thu talent</small><strong>{money(stats.revenue)}đ</strong><span>Từ đơn đã thanh toán</span></article>
       </section>
 
       <section className="talent-profile-info sh-card">

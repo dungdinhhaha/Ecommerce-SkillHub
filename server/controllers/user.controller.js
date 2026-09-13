@@ -26,7 +26,6 @@ exports.getTalentProfile = async (req, res, next) => {
     const starNumber = gigs.reduce((sum, gig) => sum + Number(gig.starNumber || 0), 0);
     const completedOrders = orders.filter((order) => order.status === "completed").length;
     const activeOrders = orders.filter((order) => ["in_progress", "submitted", "revision_requested", "disputed"].includes(order.status)).length;
-    const revenue = orders.reduce((sum, order) => sum + Number(order.sellerAmount || order.price || 0), 0);
 
     res.status(200).json({
       success: true,
@@ -38,7 +37,6 @@ exports.getTalentProfile = async (req, res, next) => {
           completedOrders,
           activeOrders,
           totalSales,
-          revenue,
           rating: starNumber ? Number((totalStars / starNumber).toFixed(1)) : null,
           reviews: starNumber,
         },
