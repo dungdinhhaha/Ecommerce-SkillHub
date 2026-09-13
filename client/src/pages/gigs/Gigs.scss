@@ -130,12 +130,10 @@
   gap: 20px;
 }
 
-.gigs .cards .link {
-  display: flex;
-}
-
 .gigs .cards .gig-card {
   width: 100%;
+  max-width: none;
+  min-width: 0;
 }
 
 .gigs .pagination {

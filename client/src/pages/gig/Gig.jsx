@@ -174,6 +174,7 @@ const Gig = () => {
                     <div className="stars muted">Chưa có đánh giá</div>
                   )}
                   <button onClick={handleContactSeller}>Nhắn tin với talent</button>
+                  <button type="button" className="profile-button" onClick={() => navigate(`/talents/${data.userId._id}`)}>Xem hồ sơ talent</button>
                 </div>
               </div>
               <div className="box">

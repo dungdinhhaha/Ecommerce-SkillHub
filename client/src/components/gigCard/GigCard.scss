@@ -1,6 +1,7 @@
 .gig-card {
   width: 100%;
   max-width: 324px;
+  min-width: 0;
   min-height: 455px;
   border: 1px solid var(--sh-border);
   border-radius: 18px;
@@ -11,6 +12,7 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  isolation: isolate;
 }
 
 .gig-card:hover {
@@ -146,15 +148,19 @@
   justify-content: space-between;
   gap: 10px;
   min-width: 0;
+  margin-top: auto;
 }
 
 .gig-card .cta {
   color: var(--sh-primary-dark);
   font-weight: 800;
   font-size: 14px;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .gig-card .price {
+  flex: 1 1 auto;
   text-align: right;
   min-width: 0;
 }
@@ -164,6 +170,7 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .04em;
+  white-space: nowrap;
 }
 
 .gig-card .price h2 {
@@ -171,6 +178,8 @@
   font-size: clamp(18px, 4vw, 20px);
   font-weight: 900;
   white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .gig-card .price .old-price {
@@ -180,6 +189,9 @@
   font-size: 13px;
   font-weight: 700;
   text-decoration: line-through;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .gig-card .price .old-price + h2 {

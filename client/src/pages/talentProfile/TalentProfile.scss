@@ -122,9 +122,10 @@
   gap: 20px;
 }
 
-.talent-product-grid .link,
 .talent-product-grid .gig-card {
   width: 100%;
+  max-width: none;
+  min-width: 0;
 }
 
 @media (max-width: 900px) {

@@ -26,7 +26,8 @@ const GigCard = ({ item }) => {
       tabIndex={0}
       onClick={openGig}
       onKeyDown={(event) => {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
           openGig();
         }
       }}

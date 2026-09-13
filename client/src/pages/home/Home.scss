@@ -12,13 +12,18 @@
 }
 
 .home .home-gigs .container {
-  width: 1200px;
+  width: min(1200px, calc(100% - 32px));
 }
 
 .home-gig-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
   gap: 22px;
+}
+
+.home-gig-grid .gig-card {
+  max-width: none;
+  min-width: 0;
 }
 
 .home .browse-home .container {
@@ -90,7 +95,7 @@
   }
 
   .home-gig-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .browse-grid {
@@ -119,6 +124,10 @@
   }
 
   .browse-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-gig-grid {
     grid-template-columns: 1fr;
   }
 
