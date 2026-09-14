@@ -6,7 +6,8 @@ const BLOCKED_EXTENSIONS = [
   ".dmg", ".deb", ".rpm",
 ];
 
-const MAX_UPLOAD_SIZE = 200 * 1024 * 1024;
+export const MAX_UPLOAD_SIZE = 500 * 1024 * 1024;
+export const MAX_UPLOAD_SIZE_LABEL = "500MB";
 
 export const validateUploadFile = (file) => {
   if (!file) return "";
@@ -17,7 +18,7 @@ export const validateUploadFile = (file) => {
     return `File ${name} có định dạng ${blocked} rủi ro cao. Vui lòng đóng gói tài nguyên hợp pháp trong .zip/.pdf/.docx/.pptx hoặc liên hệ admin để kiểm tra.`;
   }
   if (file.size > MAX_UPLOAD_SIZE) {
-    return `File ${name} vượt quá 200MB. Vui lòng nén lại hoặc chia nhỏ file.`;
+    return `File ${name} vượt quá ${MAX_UPLOAD_SIZE_LABEL}. Vui lòng nén lại hoặc chia nhỏ file.`;
   }
   return "";
 };
@@ -39,6 +40,7 @@ const upload = async (file) => {
   } catch (err) {
     console.log(err);
     console.log(err.message);
+    throw new Error(err.response?.data?.error?.message || err.message || "Upload file chưa thành công.");
   }
 };
 

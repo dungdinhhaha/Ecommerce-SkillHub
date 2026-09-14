@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import request from "../../utils/request.utils";
-import upload from "../../utils/upload.utils";
+import upload, { MAX_UPLOAD_SIZE_LABEL, validateUploadFile } from "../../utils/upload.utils";
 import "./Orders.scss";
 
 const statusLabels = {
@@ -188,6 +188,27 @@ const UploadNoteForm = ({ title, placeholder, submitLabel, requireNote = false, 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
+  const formatSize = (size) => {
+    if (!size) return "0 KB";
+    if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(1)} MB`;
+    return `${Math.max(size / 1024, 1).toFixed(0)} KB`;
+  };
+
+  const selectFiles = (fileList) => {
+    const picked = Array.from(fileList || []);
+    const validationError = picked.map(validateUploadFile).find(Boolean);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError("");
+    setFiles(picked);
+  };
+
+  const removeFile = (index) => {
+    setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if ((requireNote && !note.trim()) || (!requireNote && !note.trim() && !files.length)) {
@@ -210,10 +231,33 @@ const UploadNoteForm = ({ title, placeholder, submitLabel, requireNote = false, 
   };
 
   return <form className="delivery-form" onSubmit={handleSubmit}>
-    <strong>{title}</strong>
+    <div className="delivery-form-head">
+      <div>
+        <strong>{title}</strong>
+        <small>Hỗ trợ nhiều file, tối đa {MAX_UPLOAD_SIZE_LABEL}/file. Nếu gửi lại sau yêu cầu sửa, file mới sẽ thay thế bản bàn giao trước.</small>
+      </div>
+    </div>
     <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={placeholder} />
-    <input type="file" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
-    {!!files.length && <small>{files.length} file đã chọn</small>}
+    <label
+      className="upload-dropzone"
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.preventDefault();
+        selectFiles(event.dataTransfer.files);
+      }}
+    >
+      <input type="file" multiple onChange={(e) => selectFiles(e.target.files)} />
+      <span className="upload-icon">↑</span>
+      <strong>Kéo thả file vào đây hoặc bấm để chọn</strong>
+      <small>Gợi ý: nén source/template thành .zip trước khi gửi. Không nhận file chạy trực tiếp rủi ro cao.</small>
+    </label>
+    {!!files.length && <div className="upload-file-list">
+      {files.map((file, index) => <div className="upload-file" key={`${file.name}-${file.size}-${index}`}>
+        <span>{file.name}</span>
+        <small>{formatSize(file.size)}</small>
+        <button type="button" onClick={() => removeFile(index)}>Xóa</button>
+      </div>)}
+    </div>}
     {error && <p className="form-error">{error}</p>}
     <div className="form-actions">
       <button type="submit" disabled={uploading || isSubmitting}>{uploading || isSubmitting ? "Đang gửi..." : submitLabel}</button>
@@ -244,6 +288,17 @@ const RefundForm = ({ order, isSubmitting, onCancel, onSubmit }) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
+  const selectFiles = (fileList) => {
+    const picked = Array.from(fileList || []);
+    const validationError = picked.map(validateUploadFile).find(Boolean);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError("");
+    setFiles(picked);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const refundAmount = Number(amount || 0);
@@ -269,10 +324,15 @@ const RefundForm = ({ order, isSubmitting, onCancel, onSubmit }) => {
 
   return <form className="delivery-form dispute-form" onSubmit={handleSubmit}>
     <strong>Yêu cầu hoàn tiền / mở tranh chấp</strong>
-    <small>Đơn sẽ chuyển sang trạng thái tranh chấp, tiền talent bị khóa và admin sẽ xem bằng chứng để xử lý.</small>
+    <small>Đơn sẽ chuyển sang trạng thái tranh chấp, tiền talent bị khóa và admin sẽ xem bằng chứng để xử lý. File tối đa {MAX_UPLOAD_SIZE_LABEL}/file.</small>
     <input type="number" min="1" max={order.price} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Số tiền muốn hoàn" />
     <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Mô tả vấn đề: talent giao sai gì, thiếu gì, đã yêu cầu sửa chưa, mong muốn hoàn bao nhiêu..." />
-    <input type="file" multiple onChange={(e) => setFiles(Array.from(e.target.files || []))} />
+    <label className="upload-dropzone compact">
+      <input type="file" multiple onChange={(e) => selectFiles(e.target.files)} />
+      <span className="upload-icon">↑</span>
+      <strong>Bấm để chọn bằng chứng</strong>
+      <small>Ảnh, PDF, tài liệu hoặc file mô tả lỗi.</small>
+    </label>
     {!!files.length && <small>{files.length} file bằng chứng đã chọn</small>}
     {error && <p className="form-error">{error}</p>}
     <div className="form-actions">
