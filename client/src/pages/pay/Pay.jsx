@@ -16,6 +16,7 @@ const Pay = () => {
     queryKey: ["checkout-gig", id],
     queryFn: () => request.get(`/gigs/${id}`).then((res) => res.data.data),
   });
+  const savedVoucherCode = localStorage.getItem("skillhubSavedVoucher") || "";
 
   const checkPayment = async () => {
     if (!payment?.code) return;
@@ -55,6 +56,10 @@ const Pay = () => {
     let active = true;
     const initPayment = async () => {
       try {
+        if (savedVoucherCode) {
+          setVoucherCode(savedVoucherCode);
+          setVoucherMessage(`Đã tự điền mã ${savedVoucherCode}. Bấm Áp dụng để dùng cho đơn này.`);
+        }
         const data = await createOrder();
         if (!active || !data) return;
         timer = window.setInterval(async () => {

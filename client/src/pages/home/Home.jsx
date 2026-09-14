@@ -17,6 +17,7 @@ import request from "../../utils/request.utils";
 
 const Home = () => {
   const [showWelcome, setShowWelcome] = useState(false);
+  const [copiedVoucher, setCopiedVoucher] = useState(false);
   const { data: newest = [] } = useQuery({
     queryKey: ["home-gigs-newest"],
     queryFn: () => request.get("/gigs?sort=createdAt").then((res) => res.data.data),
@@ -60,13 +61,12 @@ const Home = () => {
     setShowWelcome(false);
   };
   const copyVoucher = async () => {
+    localStorage.setItem("skillhubSavedVoucher", voucherCode);
     try {
       await navigator.clipboard.writeText(voucherCode);
-      closeWelcome();
-      window.location.href = `/gigs?search=${encodeURIComponent(voucherCode)}`;
+      setCopiedVoucher(true);
     } catch (err) {
-      closeWelcome();
-      window.location.href = "/gigs";
+      setCopiedVoucher(true);
     }
   };
 
@@ -84,9 +84,10 @@ const Home = () => {
             <strong>{voucherCode}</strong>
           </div>
           <div className="welcome-actions">
-            <button type="button" onClick={copyVoucher}>Dùng mã ngay</button>
+            <button type="button" onClick={copyVoucher}>{copiedVoucher ? "Đã copy mã ✓" : "Dùng mã ngay"}</button>
             <button className="ghost" type="button" onClick={closeWelcome}>Để sau</button>
           </div>
+          {copiedVoucher && <small className="welcome-copied">Mã đã được lưu, khi thanh toán hệ thống sẽ tự điền giúp bạn.</small>}
         </div>
       </div>}
       <Featured />
