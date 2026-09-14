@@ -50,14 +50,10 @@ const Home = () => {
   ];
   const voucherCode = "SKILLHUB20";
   useEffect(() => {
-    const hasSeen = localStorage.getItem("skillhubWelcomeVoucherSeen");
-    if (!hasSeen) {
-      const timer = setTimeout(() => setShowWelcome(true), 450);
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => setShowWelcome(true), 450);
+    return () => clearTimeout(timer);
   }, []);
   const closeWelcome = () => {
-    localStorage.setItem("skillhubWelcomeVoucherSeen", "true");
     setShowWelcome(false);
   };
   const copyVoucher = async () => {
