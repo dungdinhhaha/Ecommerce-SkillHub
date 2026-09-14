@@ -112,9 +112,28 @@
     font-weight: 800;
 }
 
-.voucher-box small {
+.voucher-box .voucher-message {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-weight: 800;
+}
+
+.voucher-box .voucher-message.info {
     color: #047857;
-    font-weight: 700;
+    background: #ecfdf5;
+}
+
+.voucher-box .voucher-message.success {
+    color: #047857;
+    background: #dcfce7;
+}
+
+.voucher-box .voucher-message.error {
+    color: #b91c1c;
+    background: #fef2f2;
 }
 
 .trust-grid {

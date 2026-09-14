@@ -11,6 +11,7 @@ const Pay = () => {
   const [error, setError] = useState("");
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherMessage, setVoucherMessage] = useState("");
+  const [voucherStatus, setVoucherStatus] = useState("info");
   const [checking, setChecking] = useState(false);
   const { data: gig } = useQuery({
     queryKey: ["checkout-gig", id],
@@ -33,20 +34,33 @@ const Pay = () => {
   };
 
   const createOrder = async (code = "") => {
+      const cleanCode = String(code || "").trim().toUpperCase();
       try {
         setError("");
-        setVoucherMessage("");
-        const res = await request.post(`/gigs/${id}/order`, { voucherCode: code });
+        if (cleanCode) {
+          setVoucherMessage("Đang kiểm tra mã giảm giá...");
+          setVoucherStatus("info");
+        }
+        const res = await request.post(`/gigs/${id}/order`, { voucherCode: cleanCode });
         const data = res.data.data;
         setPayment(data);
-        if (code) setVoucherMessage(data.discountAmount ? `Đã áp dụng voucher ${data.voucherCode}, giảm ${Number(data.discountAmount).toLocaleString("vi-VN")} VND.` : "Voucher chưa tạo giảm giá cho đơn này.");
+        if (cleanCode) {
+          setVoucherStatus(data.discountAmount ? "success" : "info");
+          setVoucherMessage(data.discountAmount ? `Đã áp dụng voucher ${data.voucherCode}, giảm ${Number(data.discountAmount).toLocaleString("vi-VN")} VND.` : "Voucher hợp lệ nhưng chưa tạo giảm giá cho đơn này.");
+        }
         if (data.status === "paid") {
           navigate("/orders");
           return;
         }
         return data;
       } catch (err) {
-        setError(err.response?.data?.error || "Không thể tạo đơn thanh toán");
+        const message = err.response?.data?.error || "Không thể tạo đơn thanh toán";
+        if (cleanCode) {
+          setVoucherStatus("error");
+          setVoucherMessage(message);
+        } else {
+          setError(message);
+        }
         return null;
       }
     };
@@ -111,10 +125,13 @@ const Pay = () => {
         <div className="voucher-box">
           <label>Mã khuyến mãi / voucher</label>
           <div>
-            <input value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} placeholder="Ví dụ: SKILLHUB10" />
+            <input value={voucherCode} onChange={(e) => {
+              setVoucherCode(e.target.value.toUpperCase());
+              if (voucherStatus === "error") setVoucherMessage("");
+            }} placeholder="Ví dụ: SKILLHUB20" />
             <button onClick={() => createOrder(voucherCode)}>Áp dụng</button>
           </div>
-          {voucherMessage && <small>{voucherMessage}</small>}
+          {voucherMessage && <small className={`voucher-message ${voucherStatus}`}>{voucherMessage}</small>}
         </div>
         <div className="trust-grid">
           <article><strong>Mã đơn riêng</strong><span>Mỗi đơn dùng một mã DH khác nhau để không lẫn giao dịch.</span></article>

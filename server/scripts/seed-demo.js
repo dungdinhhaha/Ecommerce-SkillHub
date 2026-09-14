@@ -2,6 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const User = require("../models/user.model");
 const Gig = require("../models/gig.model");
+const Voucher = require("../models/voucher.model");
 
 const demoPassword = "SkillHub123!";
 const productFile = "https://res.cloudinary.com/ov2xvpak/image/upload/v1788597883/check.png";
@@ -493,6 +494,23 @@ async function getOrCreateUser(data) {
 
 async function seed() {
   await mongoose.connect(process.env.DB_URI);
+  await Voucher.findOneAndUpdate(
+    { code: "SKILLHUB20" },
+    {
+      code: "SKILLHUB20",
+      title: "Mã chào mừng SkillHub",
+      ownerType: "platform",
+      seller: null,
+      discountFundedBy: "platform",
+      discountType: "percent",
+      discountValue: 20,
+      maxDiscount: 50000,
+      minOrderValue: 0,
+      usageLimit: 0,
+      isActive: true,
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
   const savedUsers = {};
   for (const user of users) savedUsers[user.username] = await getOrCreateUser(user);
   for (const listing of [...listings, ...extraListings]) {
