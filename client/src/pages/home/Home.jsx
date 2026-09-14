@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import "./Home.scss";
@@ -16,6 +16,7 @@ import { cards, projects } from "../../data";
 import request from "../../utils/request.utils";
 
 const Home = () => {
+  const [showWelcome, setShowWelcome] = useState(false);
   const { data: newest = [] } = useQuery({
     queryKey: ["home-gigs-newest"],
     queryFn: () => request.get("/gigs?sort=createdAt").then((res) => res.data.data),
@@ -46,9 +47,48 @@ const Home = () => {
       items: categories.map((cat) => ({ label: cat.name, desc: `${cat.description || "Khám phá danh mục"} · ${cat.count || 0} mục`, to: `/gigs?cat=${cat.slug}` })),
     },
   ];
+  const voucherCode = "SKILLHUB20";
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("skillhubWelcomeVoucherSeen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => setShowWelcome(true), 450);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  const closeWelcome = () => {
+    localStorage.setItem("skillhubWelcomeVoucherSeen", "true");
+    setShowWelcome(false);
+  };
+  const copyVoucher = async () => {
+    try {
+      await navigator.clipboard.writeText(voucherCode);
+      closeWelcome();
+      window.location.href = `/gigs?search=${encodeURIComponent(voucherCode)}`;
+    } catch (err) {
+      closeWelcome();
+      window.location.href = "/gigs";
+    }
+  };
 
   return (
     <div className="home">
+      {showWelcome && <div className="welcome-modal" role="dialog" aria-modal="true" aria-label="Mã giảm giá chào mừng">
+        <div className="welcome-backdrop" onClick={closeWelcome} />
+        <div className="welcome-card">
+          <button className="welcome-close" type="button" onClick={closeWelcome} aria-label="Đóng">×</button>
+          <span className="welcome-badge">Chào mừng bạn đến với SkillHub</span>
+          <h2>Tìm người giỏi, mua sản phẩm hay</h2>
+          <p className="welcome-message">Giao dịch an tâm hơn với thanh toán bảo vệ, dữ liệu được giữ riêng tư và hỗ trợ khi cần.</p>
+          <div className="welcome-code">
+            <small>Mã giảm giá hôm nay</small>
+            <strong>{voucherCode}</strong>
+          </div>
+          <div className="welcome-actions">
+            <button type="button" onClick={copyVoucher}>Dùng mã ngay</button>
+            <button className="ghost" type="button" onClick={closeWelcome}>Để sau</button>
+          </div>
+        </div>
+      </div>}
       <Featured />
       <TrustedBy />
       <section className="browse-home">

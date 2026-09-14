@@ -23,7 +23,6 @@ const Featured = () => {
         <div className="left">
           <h1>
             Tìm người giỏi, mua sản phẩm hay
-            <span> dễ dàng và an tâm</span>
           </h1>
           <SearchBox className="hero-search" value={input} onChange={setInput} onSearch={handleSearch} placeholder="Tìm source code, PowerPoint, thiết kế logo..." />
           <div className="popular">

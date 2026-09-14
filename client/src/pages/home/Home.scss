@@ -5,6 +5,132 @@
   background: #fff;
 }
 
+.welcome-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.welcome-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 44, 21, .58);
+  backdrop-filter: blur(5px);
+}
+
+.welcome-card {
+  position: relative;
+  width: min(460px, 100%);
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 34px;
+  background:
+    radial-gradient(circle at top right, rgba(22, 199, 132, .24), transparent 15rem),
+    linear-gradient(145deg, #ffffff, #ecfdf5);
+  border: 1px solid rgba(187, 247, 208, .9);
+  box-shadow: 0 30px 90px rgba(2, 44, 21, .28);
+  text-align: center;
+}
+
+.welcome-card::before {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  left: -70px;
+  top: -70px;
+  background: rgba(22, 199, 132, .12);
+}
+
+.welcome-close {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 27px;
+  line-height: 1;
+}
+
+.welcome-badge {
+  display: inline-flex;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #dcfce7;
+  color: #047857;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.welcome-card h2 {
+  margin: 0;
+  color: #052e16;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -.05em;
+}
+
+.welcome-message {
+  margin: 14px auto 20px;
+  max-width: 360px;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.welcome-code {
+  display: grid;
+  gap: 6px;
+  margin: 0 auto 18px;
+  max-width: 290px;
+  border: 1px dashed #16c784;
+  border-radius: 18px;
+  padding: 14px;
+  background: #fff;
+}
+
+.welcome-code small {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.welcome-code strong {
+  color: #065f46;
+  font-size: 30px;
+  letter-spacing: .08em;
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.welcome-actions button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #16c784;
+  color: white;
+  font-weight: 900;
+}
+
+.welcome-actions .ghost {
+  background: white;
+  color: #065f46;
+  border: 1px solid #bbf7d0;
+}
+
 .home .home-gigs {
   display: flex;
   justify-content: center;
