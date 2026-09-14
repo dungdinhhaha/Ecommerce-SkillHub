@@ -18,6 +18,7 @@ const walletRouter = require("./routes/wallet.route");
 const categoryRouter = require("./routes/category.route");
 const wishlistRouter = require("./routes/wishlist.route");
 const voucherRouter = require("./routes/voucher.route");
+const uploadRouter = require("./routes/upload.route");
 const { handleSepayWebhook } = require("./controllers/order.controller");
 
 const app = express();
@@ -119,6 +120,7 @@ app.use("/api/wallet", walletRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/vouchers", voucherRouter);
+app.use("/api/upload", uploadRouter);
 app.post("/api/webhooks/sepay", handleSepayWebhook);
 app.get("/api/webhooks/sepay", (req, res) => {
   res.status(200).json({ success: true, message: "SkillHub SePay webhook is ready" });

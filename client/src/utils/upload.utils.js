@@ -1,4 +1,4 @@
-import axios from "axios";
+import request from "./request.utils";
 
 const BLOCKED_EXTENSIONS = [
   ".exe", ".bat", ".cmd", ".com", ".scr", ".pif", ".msi", ".dll",
@@ -28,19 +28,14 @@ const upload = async (file) => {
   if (validationError) throw new Error(validationError);
   const data = new FormData();
   data.append("file", file);
-  data.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
   try {
-    const res = await axios.post(
-      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/auto/upload`,
-      data
-    );
-    const { secure_url } = res.data;
-    return secure_url;
+    const res = await request.post("/upload", data);
+    return res.data.data.url;
   } catch (err) {
     console.log(err);
     console.log(err.message);
-    throw new Error(err.response?.data?.error?.message || err.message || "Upload file chưa thành công.");
+    throw new Error(err.response?.data?.error || err.response?.data?.message || err.message || "Upload file chưa thành công.");
   }
 };
 
