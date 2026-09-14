@@ -22,7 +22,8 @@ const Featured = () => {
       <div className="container">
         <div className="left">
           <h1>
-            Tìm <span>sản phẩm số</span> và dịch vụ kỹ năng phù hợp
+            Tìm người giỏi, mua sản phẩm hay
+            <span> dễ dàng và an tâm</span>
           </h1>
           <SearchBox className="hero-search" value={input} onChange={setInput} onSearch={handleSearch} placeholder="Tìm source code, PowerPoint, thiết kế logo..." />
           <div className="popular">
