@@ -33,6 +33,15 @@ const Navbar = () => {
     navigate("/");
   };
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const getAvatarSrc = (src) => {
+    const value = String(src || "").trim();
+    if (!value || value === "undefined" || value === "null") return "/img/noavatar.png";
+    return value;
+  };
+  const useDefaultAvatar = (event) => {
+    if (event.currentTarget.src.endsWith("/img/noavatar.png")) return;
+    event.currentTarget.src = "/img/noavatar.png";
+  };
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: () => request.get("/categories").then((res) => res.data.data),
@@ -73,13 +82,13 @@ const Navbar = () => {
           {!currentUser?.isSeller && <Link className="link" to="/register"><span>Trở thành talent</span></Link>}
           {currentUser && (
             <div className="user" onClick={() => setOpen(!open)}>
-              <img src={currentUser?.img || "./img/noavatar.png"} alt="" />
+              <img src={getAvatarSrc(currentUser?.img)} alt="" onError={useDefaultAvatar} />
               <span>{currentUser?.username}</span>
               <b>⌄</b>
               {open && (
                 <div className="options">
                   <div className="account-mini">
-                    <img src={currentUser?.img || "/img/noavatar.png"} alt="" />
+                    <img src={getAvatarSrc(currentUser?.img)} alt="" onError={useDefaultAvatar} />
                     <div>
                       <strong>{currentUser?.username}</strong>
                       <small>{currentUser?.isAdmin ? "Quản trị viên" : currentUser?.isSeller ? "Talent" : "Buyer"}</small>
@@ -161,7 +170,7 @@ const Navbar = () => {
           }} placeholder="Tìm sản phẩm/dịch vụ" />
           {currentUser ? (
             <div className="drawer-account">
-              <img src={currentUser?.img || "/img/noavatar.png"} alt="" />
+              <img src={getAvatarSrc(currentUser?.img)} alt="" onError={useDefaultAvatar} />
               <div>
                 <strong>{currentUser?.username}</strong>
                 <small>{currentUser?.isAdmin ? "Quản trị viên" : currentUser?.isSeller ? "Talent" : "Buyer"}</small>
