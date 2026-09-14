@@ -1,19 +1,50 @@
-.trusted-by{
-    background-color: #fafafa;
-    height: 100px;
+.trusted-by {
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+  display: flex;
+  justify-content: center;
+  padding: 28px 16px;
+  border-bottom: 1px solid #dcfce7;
+
+  .container {
+    width: min(960px, 100%);
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 10px;
+    color: #0f172a;
+  }
+
+  .promise-kicker {
+    border-radius: 999px;
+    padding: 7px 12px;
+    background: #dcfce7;
+    color: #047857;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  p {
+    max-width: 760px;
+    color: #334155;
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.55;
+    font-weight: 600;
+  }
+
+  .promise-pills {
     display: flex;
     justify-content: center;
-    .container{
-        width: 760px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        color: lightgray;
-        font-weight: 500;
-        img{
-            height: 50px;
-            object-fit: contain;
-        }
+    gap: 8px;
+    flex-wrap: wrap;
+
+    span {
+      border: 1px solid #bbf7d0;
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: #fff;
+      color: #065f46;
+      font-size: 13px;
+      font-weight: 800;
     }
+  }
 }

@@ -5,27 +5,15 @@ const TrustedBy = () => {
   return (
     <div className="trusted-by">
       <div className="container">
-        <span>Trusted By</span>
-        <img
-          src="https://fiverr-res.cloudinary.com/npm-assets/@fiverr/logged_out_homepage_perseus/apps/facebook2x.188a797.png"
-          alt=""
-        />
-        <img
-          src="https://fiverr-res.cloudinary.com/npm-assets/@fiverr/logged_out_homepage_perseus/apps/google2x.06d74c8.png"
-          alt=""
-        />
-        <img
-          src="https://fiverr-res.cloudinary.com/npm-assets/@fiverr/logged_out_homepage_perseus/apps/netflix2x.887e47e.png"
-          alt=""
-        />
-        <img
-          src="https://fiverr-res.cloudinary.com/npm-assets/@fiverr/logged_out_homepage_perseus/apps/pandg2x.6dc32e4.png"
-          alt=""
-        />
-        <img
-          src="https://fiverr-res.cloudinary.com/npm-assets/@fiverr/logged_out_homepage_perseus/apps/paypal2x.22728be.png"
-          alt=""
-        />
+        <span className="promise-kicker">Lời hứa từ SkillHub</span>
+        <p>
+          Tụi mình sẽ luôn cố gắng để mỗi đơn hàng được rõ ràng, an toàn và làm bạn hài lòng hơn sau từng lần trải nghiệm.
+        </p>
+        <div className="promise-pills">
+          <span>Giữ tiền bảo vệ</span>
+          <span>Lắng nghe phản hồi</span>
+          <span>Đồng hành đến khi ổn</span>
+        </div>
       </div>
     </div>
   );
