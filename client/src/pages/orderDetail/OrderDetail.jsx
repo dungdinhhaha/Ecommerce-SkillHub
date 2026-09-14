@@ -22,8 +22,21 @@ const OrderDetail = () => {
     queryFn: () => request.get(`/gigs/order/${id}/detail`).then((res) => res.data.data),
   });
 
+  const openDeliveryFile = async (index) => {
+    const res = await request.get(`/gigs/order/${id}/delivery-files/${index}`);
+    window.open(res.data.data.url, "_blank");
+  };
+
   if (isLoading) return <div className="order-detail"><div className="container"><p>Đang tải chi tiết đơn...</p></div></div>;
   if (isError) return <div className="order-detail"><div className="container"><p>Không tải được đơn hàng.</p></div></div>;
+
+  const deliveryEvent = [...(data.timeline || [])].reverse().find((item) => item.type === "delivered");
+  const deliveryResult = {
+    note: data.deliveryNote || deliveryEvent?.note || "",
+    files: data.deliveryFiles?.length ? data.deliveryFiles : deliveryEvent?.files || [],
+    createdAt: deliveryEvent?.createdAt || data.deliveredAt,
+    hasDelivery: !!(data.deliveryNote || data.deliveryFiles?.length || deliveryEvent),
+  };
 
   return <div className="order-detail"><div className="container">
     <Link to="/orders">← Quay lại đơn hàng</Link>
@@ -37,7 +50,16 @@ const OrderDetail = () => {
       <article><small>Giá trị đơn</small><strong>{money(data.price)} VND</strong><span>Talent nhận: {money(data.sellerAmount || data.price)} VND</span></article>
       <article><small>Thanh toán</small><strong>{data.paymentStatus}</strong><span>{data.sepayTransactionId || "Chưa có mã giao dịch"}</span></article>
     </div>
-    {data.deliveryNote && <section><h2>Bàn giao</h2><p>{data.deliveryNote}</p></section>}
+    {deliveryResult.hasDelivery && <section className="delivery-result">
+      <div className="section-title-row">
+        <h2>Kết quả bàn giao</h2>
+        {deliveryResult.createdAt && <small>{new Date(deliveryResult.createdAt).toLocaleString("vi-VN")}</small>}
+      </div>
+      {deliveryResult.note && <p>{deliveryResult.note}</p>}
+      {deliveryResult.files.length > 0 ? <div className="delivery-files">
+        {deliveryResult.files.map((fileUrl, index) => <button type="button" onClick={() => openDeliveryFile(index)} key={`${fileUrl}-${index}`}>Tải file bàn giao {index + 1}</button>)}
+      </div> : <small>Đã ghi nhận bàn giao, chưa có file đính kèm.</small>}
+    </section>}
     {data.buyerNote && <section><h2>Yêu cầu sửa</h2><p>{data.buyerNote}</p></section>}
     {data.disputeReason && <section className="dispute"><h2>Tranh chấp/hoàn tiền</h2><p>{data.disputeReason}</p></section>}
     <section>

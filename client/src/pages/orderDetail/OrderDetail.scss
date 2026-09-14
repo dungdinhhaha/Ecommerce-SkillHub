@@ -11,6 +11,12 @@
 .order-detail-grid strong { color: #1dbf73; }
 .order-detail section h2 { margin: 0 0 10px; }
 .order-detail section p { color: #555; line-height: 1.5; }
+.order-detail .delivery-result { background: #f0fdf4; border-color: #bbf7d0; border-left: 4px solid #1dbf73; }
+.section-title-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.section-title-row h2 { margin: 0; }
+.section-title-row small { color: #64748b; font-weight: 600; }
+.delivery-files { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.delivery-files button { border: 1px solid #1dbf73; border-radius: 999px; padding: 9px 13px; color: #16864d; text-decoration: none; font-size: 14px; background: white; cursor: pointer; font-weight: 800; }
 .order-detail .dispute { background: #fff4f4; border-left: 4px solid #d9534f; }
 .detail-timeline { display: grid; gap: 12px; }
 .detail-timeline div { display: grid; gap: 4px; padding-left: 12px; border-left: 3px solid #1dbf73; }

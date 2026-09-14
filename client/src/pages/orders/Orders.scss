@@ -52,6 +52,9 @@
 .order-actions button.danger { background: #d9534f; }
 .order-actions button:disabled, .review-form button:disabled, .delivery-form button:disabled { background: #9acfb4; cursor: not-allowed; }
 .delivery-box { padding: 15px 18px; border-top: 1px solid #eee; background: #fafafa; }
+.delivery-result-box { background: #f0fdf4; border-top-color: #bbf7d0; border-left: 4px solid #1dbf73; }
+.delivery-box-title { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.delivery-box-title small { color: #64748b; font-weight: 600; }
 .revision-box { background: #fffaf0; }
 .dispute-box { background: #fff4f4; border-left: 4px solid #d9534f; }
 .delivery-box p { margin: 8px 0; color: #555; line-height: 1.5; }

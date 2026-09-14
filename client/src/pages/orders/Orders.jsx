@@ -67,6 +67,15 @@ const Orders = () => {
     setSearchDraft("");
     setSearchTerm("");
   };
+  const getDeliveryResult = (order) => {
+    const deliveryEvent = [...(order.timeline || [])].reverse().find((item) => item.type === "delivered");
+    return {
+      note: order.deliveryNote || deliveryEvent?.note || "",
+      files: order.deliveryFiles?.length ? order.deliveryFiles : deliveryEvent?.files || [],
+      createdAt: deliveryEvent?.createdAt || order.deliveredAt,
+      hasDelivery: !!(order.deliveryNote || order.deliveryFiles?.length || deliveryEvent),
+    };
+  };
 
   return <div className="orders"><div className="container">
     <div className="title"><h1>{currentUser.isSeller ? "Trung tâm đơn của talent" : "Trung tâm mua hàng"}</h1><span>{filteredOrders.length}/{data.length} đơn</span></div>
@@ -97,6 +106,7 @@ const Orders = () => {
     {!filteredOrders.length && <p>{data.length ? "Không có đơn nào trong trạng thái này." : "Bạn chưa có đơn hàng đã thanh toán."}</p>}
     <div className="order-list">{filteredOrders.map((order) => {
       const isOpen = openOrderId === order._id;
+      const deliveryResult = getDeliveryResult(order);
       return <article className={`order-card ${isOpen ? "open" : ""}`} key={order._id}>
       <button type="button" className="order-summary" onClick={() => setOpenOrderId(isOpen ? "" : order._id)}>
         <img className="image" src={order.gig?.cover || "/img/noavatar.png"} alt="" />
@@ -126,10 +136,13 @@ const Orders = () => {
         {order.buyerNote && <p>{order.buyerNote}</p>}
         {order.revisionFiles?.length > 0 && <div className="delivery-files">{order.revisionFiles.map((fileUrl, index) => <a href={fileUrl} target="_blank" rel="noreferrer" key={fileUrl}>File góp ý {index + 1}</a>)}</div>}
         </div>}
-        {(order.deliveryNote || order.deliveryFiles?.length > 0) && <div className="delivery-box">
-        <strong>Kết quả bàn giao</strong>
-        {order.deliveryNote && <p>{order.deliveryNote}</p>}
-        {order.deliveryFiles?.length > 0 && <div className="delivery-files">{order.deliveryFiles.map((fileUrl, index) => <button type="button" onClick={() => openDeliveryFile(order._id, index)} key={fileUrl}>Tải file {index + 1}</button>)}</div>}
+        {deliveryResult.hasDelivery && <div className="delivery-box delivery-result-box">
+        <div className="delivery-box-title">
+          <strong>{currentUser.isSeller ? "Kết quả bạn đã gửi" : "Kết quả talent đã gửi"}</strong>
+          {deliveryResult.createdAt && <small>{new Date(deliveryResult.createdAt).toLocaleString("vi-VN")}</small>}
+        </div>
+        {deliveryResult.note && <p>{deliveryResult.note}</p>}
+        {deliveryResult.files.length > 0 ? <div className="delivery-files">{deliveryResult.files.map((fileUrl, index) => <button type="button" onClick={() => openDeliveryFile(order._id, index)} key={`${fileUrl}-${index}`}>Tải file bàn giao {index + 1}</button>)}</div> : <small>Đã ghi nhận bàn giao, chưa có file đính kèm.</small>}
         </div>}
         {order.timeline?.length > 0 && <Timeline items={order.timeline} />}
         {delivering?._id === order._id && <DeliveryForm
