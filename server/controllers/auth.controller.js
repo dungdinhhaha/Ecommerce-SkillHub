@@ -24,6 +24,31 @@ const sendToken = (user, res, statusCode) => {
   });
 };
 
+const sendWelcomeEmail = async (user) => {
+  const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+  const role = user.isAdmin ? "Quản trị viên" : user.isSeller ? "Talent" : "Buyer";
+  const text = `Chào mừng bạn đến với SkillHub!\n\nThông tin tài khoản của bạn:\n- Tên đăng nhập: ${user.username}\n- Email: ${user.email}\n- Loại tài khoản: ${role}\n\nBạn có thể đăng nhập tại: ${clientUrl}/login\n\nLưu ý: SkillHub không gửi mật khẩu qua email để bảo vệ tài khoản của bạn. Nếu quên mật khẩu, hãy dùng chức năng Quên mật khẩu trên trang đăng nhập.`;
+
+  await sendEmail({
+    to: user.email,
+    subject: "Chào mừng bạn đến với SkillHub",
+    text,
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+        <h2>Chào mừng bạn đến với SkillHub!</h2>
+        <p>Tài khoản của bạn đã được tạo thành công. Mình gửi lại vài thông tin cơ bản để bạn dễ nhớ khi đăng nhập.</p>
+        <div style="background:#ecfdf5;border:1px solid #bbf7d0;border-radius:16px;padding:14px 16px;margin:16px 0">
+          <p><strong>Tên đăng nhập:</strong> ${user.username}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Loại tài khoản:</strong> ${role}</p>
+        </div>
+        <p><a href="${clientUrl}/login" style="display:inline-block;background:#1dbf73;color:white;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:700">Đăng nhập SkillHub</a></p>
+        <p style="color:#64748b">SkillHub không gửi mật khẩu qua email để bảo vệ tài khoản của bạn. Nếu quên mật khẩu, hãy dùng chức năng Quên mật khẩu trên trang đăng nhập.</p>
+      </div>
+    `,
+  });
+};
+
 exports.register = async (req, res, next) => {
   try {
     if (!req.body.termsAccepted) {
@@ -37,6 +62,7 @@ exports.register = async (req, res, next) => {
         version: "2026-09",
       },
     });
+    sendWelcomeEmail(user).catch((err) => console.error("Welcome email error:", err.message || err));
     sendToken(user, res, 201);
   } catch (err) {
     next(err);
