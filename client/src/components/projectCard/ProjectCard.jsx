@@ -3,15 +3,21 @@ import { Link } from "react-router-dom";
 import "./ProjectCard.scss";
 
 const ProjectCard = ({ item }) => {
+  const title = item.title || item.cat || "Listing SkillHub";
+  const seller = item.userId?.username || item.username || "talent";
+  const cover = item.cover || item.img || "/img/demo.png";
+  const avatar = item.userId?.img || item.pp || "/img/noavatar.png";
+  const to = item._id ? `/gig/${item._id}` : `/gigs?search=${encodeURIComponent(title)}`;
+
   return (
-    <Link to={`/gigs?search=${encodeURIComponent(item.cat)}`} className="link">
+    <Link to={to} className="link">
       <div className="project-card">
-        <img src={item.img} alt="" onError={(e) => { e.currentTarget.src = "/img/demo.png"; }} />
+        <img src={cover} alt={title} onError={(e) => { e.currentTarget.src = "/img/demo.png"; }} />
         <div className="info">
-          <img src={item.pp} alt="" onError={(e) => { e.currentTarget.src = "/img/noavatar.png"; }} />
+          <img src={avatar} alt={seller} onError={(e) => { e.currentTarget.src = "/img/noavatar.png"; }} />
           <div className="texts">
-            <h2>{item.cat}</h2>
-            <span>{item.username}</span>
+            <h2>{title}</h2>
+            <span>{seller}</span>
           </div>
         </div>
       </div>

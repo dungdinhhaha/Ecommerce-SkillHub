@@ -12,7 +12,7 @@ import {
   ProjectCard,
 } from "../../components";
 import GigCard from "../../components/gigCard/GigCard";
-import { cards, projects } from "../../data";
+import { cards } from "../../data";
 import request from "../../utils/request.utils";
 
 const Home = () => {
@@ -30,6 +30,10 @@ const Home = () => {
     queryKey: ["home-gigs-services"],
     queryFn: () => request.get("/gigs?type=skill_service&sort=sales").then((res) => res.data.data),
   });
+  const spotlight = [...newest, ...digital, ...services].reduce((items, gig) => {
+    if (!gig?._id || items.some((item) => item._id === gig._id)) return items;
+    return [...items, gig];
+  }, []).slice(0, 8);
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: () => request.get("/categories").then((res) => res.data.data),
@@ -114,11 +118,11 @@ const Home = () => {
       <HomeGigSection title="Sản phẩm số nổi bật" desc="Thanh toán xong là tải source/template/tài liệu." items={digital.slice(0, 4)} />
       <HomeGigSection title="Dịch vụ kỹ năng bán chạy" desc="Thuê talent làm theo yêu cầu, tiền được SkillHub giữ bảo vệ giao dịch." items={services.slice(0, 4)} />
       <Features />
-      <Slide slidesToShow={4} arrowsScroll={4}>
-        {projects.map((project) => (
-          <ProjectCard item={project} key={project.id} />
+      {!!spotlight.length && <Slide slidesToShow={4} arrowsScroll={4}>
+        {spotlight.map((project) => (
+          <ProjectCard item={project} key={project._id} />
         ))}
-      </Slide>
+      </Slide>}
     </div>
   );
 };
