@@ -45,5 +45,40 @@
         color: red;
         font-size: 12px;
       }
+
+      .auth-hint {
+        color: #64748b;
+        line-height: 1.55;
+        margin-top: -10px;
+      }
+
+      .auth-link {
+        color: #047857;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .forgot-link {
+        align-self: flex-end;
+        margin-top: -12px;
+      }
+
+      .auth-message {
+        margin: 0;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-weight: 800;
+        line-height: 1.45;
+      }
+
+      .auth-message.success {
+        color: #047857;
+        background: #ecfdf5;
+      }
+
+      .auth-message.error {
+        color: #b91c1c;
+        background: #fef2f2;
+      }
     }
   }

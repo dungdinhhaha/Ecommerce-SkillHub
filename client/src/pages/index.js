@@ -23,3 +23,5 @@ export { default as Account } from "./account/Account.jsx";
 export { default as TalentVouchers } from "./talentVouchers/TalentVouchers.jsx";
 export { default as Cart } from "./cart/Cart.jsx";
 export { default as TalentProfile } from "./talentProfile/TalentProfile.jsx";
+export { default as ForgotPassword } from "./forgotPassword/ForgotPassword.jsx";
+export { default as ResetPassword } from "./resetPassword/ResetPassword.jsx";

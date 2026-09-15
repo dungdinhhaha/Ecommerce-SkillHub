@@ -1,5 +1,7 @@
 const User = require("../models/user.model");
 const createError = require("../utils/createError");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 
 const sendToken = (user, res, statusCode) => {
   const token = user.getSignToken();
@@ -51,6 +53,102 @@ exports.login = async (req, res, next) => {
   }
   user.password = undefined;
   sendToken(user, res, 200);
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const account = String(req.body.account || "").trim();
+    if (!account) return next(createError(400, "Vui lòng nhập email hoặc tên đăng nhập"));
+
+    const user = await User.findOne({
+      $or: [
+        { email: account.toLowerCase() },
+        { username: account },
+      ],
+    });
+    if (!user) return next(createError(404, "Không tìm thấy tài khoản với email hoặc tên đăng nhập này"));
+    if (user.accountStatus === "blocked") return next(createError(403, "Tài khoản đã bị khóa bởi quản trị viên"));
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+    await user.save({ validateBeforeSave: false });
+
+    const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+    const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
+    const message = `Bạn vừa yêu cầu đặt lại mật khẩu SkillHub.\n\nBấm vào link này trong 15 phút: ${resetUrl}\n\nNếu không phải bạn, hãy bỏ qua email này.`;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Đặt lại mật khẩu SkillHub",
+        text: message,
+        html: `
+          <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+            <h2>Đặt lại mật khẩu SkillHub</h2>
+            <p>Bạn vừa yêu cầu đặt lại mật khẩu. Link này có hiệu lực trong <strong>15 phút</strong>.</p>
+            <p><a href="${resetUrl}" style="display:inline-block;background:#1dbf73;color:white;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:700">Đặt lại mật khẩu</a></p>
+            <p>Nếu nút không hoạt động, copy link này:</p>
+            <p style="word-break:break-all">${resetUrl}</p>
+            <p>Nếu không phải bạn, hãy bỏ qua email này.</p>
+          </div>
+        `,
+      });
+
+      res.status(200).json({ success: true, data: { message: `Đã gửi link đặt lại mật khẩu tới ${user.email}` } });
+    } catch (mailError) {
+      user.resetPasswordToken = "";
+      user.resetPasswordExpire = null;
+      await user.save({ validateBeforeSave: false });
+      return next(createError(500, "Chưa gửi được email đặt lại mật khẩu. Kiểm tra SMTP trên server."));
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const token = String(req.params.token || "");
+    const password = String(req.body.password || "");
+    if (password.length < 6) return next(createError(400, "Mật khẩu mới cần ít nhất 6 ký tự"));
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+    if (!user) return next(createError(400, "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn"));
+
+    user.password = password;
+    user.resetPasswordToken = "";
+    user.resetPasswordExpire = null;
+    await user.save();
+    sendToken(user, res, 200);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.changePassword = async (req, res, next) => {
+  try {
+    const currentPassword = String(req.body.currentPassword || "");
+    const newPassword = String(req.body.newPassword || "");
+    if (!currentPassword || !newPassword) return next(createError(400, "Vui lòng nhập đủ mật khẩu hiện tại và mật khẩu mới"));
+    if (newPassword.length < 6) return next(createError(400, "Mật khẩu mới cần ít nhất 6 ký tự"));
+
+    const user = await User.findById(req.user.id);
+    if (!user) return next(createError(404, "Không tìm thấy tài khoản"));
+    if (!(await user.isPasswordMatch(currentPassword))) return next(createError(400, "Mật khẩu hiện tại không đúng"));
+
+    user.password = newPassword;
+    user.resetPasswordToken = "";
+    user.resetPasswordExpire = null;
+    await user.save();
+    sendToken(user, res, 200);
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.logout = async (req, res, next) => {

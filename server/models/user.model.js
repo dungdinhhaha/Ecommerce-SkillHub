@@ -56,6 +56,14 @@ const UserModel = new mongoose.Schema(
       privacyAcceptedAt: { type: Date, default: null },
       version: { type: String, default: "2026-09" },
     },
+    resetPasswordToken: {
+      type: String,
+      default: "",
+    },
+    resetPasswordExpire: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

@@ -12,6 +12,8 @@ const Account = () => {
   const [avatarFile, setAvatarFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [form, setForm] = useState({
     username: currentUser?.username || "",
     email: currentUser?.email || "",
@@ -43,6 +45,16 @@ const Account = () => {
     },
     onError: (err) => setMessage(err.response?.data?.error || "Chưa lưu được thông tin."),
   });
+  const passwordMutation = useMutation({
+    mutationFn: (payload) => request.patch("/auth/change-password", payload).then((res) => res.data.data),
+    onSuccess: (data) => {
+      localStorage.setItem("currentUser", JSON.stringify(data.user));
+      if (data.token) localStorage.setItem("accessToken", data.token);
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordMessage("Đã đổi mật khẩu thành công.");
+    },
+    onError: (err) => setPasswordMessage(err.response?.data?.error || "Chưa đổi được mật khẩu."),
+  });
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -65,6 +77,22 @@ const Account = () => {
       setUploading(false);
     }
     mutation.mutate({ ...form, img });
+  };
+  const handlePasswordSave = (e) => {
+    e.preventDefault();
+    setPasswordMessage("");
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordMessage("Mật khẩu mới cần ít nhất 6 ký tự.");
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMessage("Mật khẩu nhập lại chưa khớp.");
+      return;
+    }
+    passwordMutation.mutate({
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword,
+    });
   };
 
   return (
@@ -129,6 +157,28 @@ const Account = () => {
             <button disabled={mutation.isLoading || uploading}>
               {uploading ? "Đang upload ảnh..." : mutation.isLoading ? "Đang lưu..." : "Lưu thông tin"}
             </button>
+          </form>
+          <form className="account-form password-form" onSubmit={handlePasswordSave}>
+            <div>
+              <h2>Đổi mật khẩu</h2>
+              <p>Nhập mật khẩu hiện tại để đổi sang mật khẩu mới.</p>
+            </div>
+            <label>
+              Mật khẩu hiện tại
+              <input type="password" autoComplete="current-password" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))} />
+            </label>
+            <div className="form-row">
+              <label>
+                Mật khẩu mới
+                <input type="password" autoComplete="new-password" value={passwordForm.newPassword} onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))} />
+              </label>
+              <label>
+                Nhập lại mật khẩu mới
+                <input type="password" autoComplete="new-password" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))} />
+              </label>
+            </div>
+            {passwordMessage && <p className="account-message">{passwordMessage}</p>}
+            <button disabled={passwordMutation.isLoading}>{passwordMutation.isLoading ? "Đang đổi..." : "Đổi mật khẩu"}</button>
           </form>
         </div>
       </div>

@@ -54,6 +54,7 @@ const Login = () => {
             autoComplete="current-password"
             onChange={(e) => setPassword(e.target.value)}
           />
+          <Link className="auth-link forgot-link" to="/forgot-password">Quên mật khẩu?</Link>
           <button type="submit">Đăng nhập</button>
           {error && <p role="alert">{error}</p>}
         </form>

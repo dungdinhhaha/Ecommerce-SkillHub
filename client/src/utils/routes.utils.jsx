@@ -28,6 +28,8 @@ import {
   TalentVouchers,
   Cart,
   TalentProfile,
+  ForgotPassword,
+  ResetPassword,
 } from "../pages";
 
 import { Navbar, Footer } from "../components";
@@ -154,6 +156,14 @@ const Routes = [
       {
         path: "/login",
         element: <Login />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "/reset-password/:token",
+        element: <ResetPassword />,
       },
     ],
   },
