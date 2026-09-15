@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://skillhub.vn/</loc></url>
-  <url><loc>https://skillhub.vn/gigs</loc></url>
-  <url><loc>https://skillhub.vn/about</loc></url>
-  <url><loc>https://skillhub.vn/policy</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/gigs</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/gigs?search=react</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/gigs?search=powerpoint</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/gigs?search=template%20cv</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/gigs?search=edit%20video</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/about</loc></url>
+  <url><loc>https://ecommerce-skill-hub-liart.vercel.app/policy</loc></url>
 </urlset>
