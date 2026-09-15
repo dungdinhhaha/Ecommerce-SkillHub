@@ -117,7 +117,9 @@ const sections = [
     title: "Phí nền tảng và khuyến mãi",
     desc: "SkillHub có thể thu phí trên đơn hàng để duy trì hệ thống, xử lý thanh toán, lưu trữ file, kiểm duyệt nội dung, hỗ trợ người dùng và xử lý tranh chấp.",
     bullets: [
-      "Phí nền tảng, số tiền buyer thanh toán, voucher, tiền giảm giá, tiền talent nhận và trạng thái giữ tiền cần được hiển thị minh bạch trong đơn hàng/ví talent.",
+      "SkillHub thu phí nền tảng mặc định 10% trên mỗi đơn hàng thanh toán thành công; 90% còn lại là phần tiền talent nhận trước các điều chỉnh hoàn tiền hoặc tranh chấp nếu có.",
+      "Nếu voucher do SkillHub tài trợ, phí nền tảng 10% được tính trên giá gốc của listing; nếu voucher do talent tạo, phí nền tảng 10% được tính trên giá sau giảm.",
+      "Phí nền tảng, số tiền buyer thanh toán, voucher, tiền giảm giá, tiền talent nhận và trạng thái giữ tiền cần được hiển thị minh bạch trong đơn hàng/ví talent trước khi talent rút tiền.",
       "Voucher do SkillHub phát hành do SkillHub tài trợ; voucher do talent tạo sẽ trừ vào doanh thu của talent và không vượt quá giới hạn nền tảng cho phép.",
       "Tiền talent có thể được giữ trong thời gian bảo vệ giao dịch 10 ngày trước khi khả dụng để rút, trừ trường hợp đơn đang tranh chấp, hoàn tiền hoặc bị rà soát rủi ro.",
     ],
