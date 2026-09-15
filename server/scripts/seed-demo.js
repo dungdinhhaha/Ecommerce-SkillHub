@@ -76,6 +76,16 @@ const listings = [
     approvalStatus: "approved", cover: coverImages.reactBug, sales: 8,
   },
   {
+    title: "Test dịch vụ kỹ năng 10.000đ",
+    listingType: "skill_service",
+    description: "Listing giá thấp dùng để test luồng đặt đơn, thanh toán, nhắn tin và bàn giao dịch vụ kỹ năng trên SkillHub.",
+    shortTitle: "Test dịch vụ 10k",
+    shortDesc: "Dịch vụ test nhanh giá 10.000đ.",
+    cat: "web", price: 10000, deliveryTime: 1, revisionNumber: 1,
+    features: ["Test đặt đơn", "Test thanh toán", "Test bàn giao"],
+    approvalStatus: "approved", cover: coverImages.reactBug, sales: 0,
+  },
+  {
     title: "Viết API Node.js Express MongoDB",
     listingType: "skill_service",
     description: "Xây dựng API cơ bản bằng Node.js, Express và MongoDB cho đồ án hoặc MVP.",
