@@ -12,6 +12,9 @@ const sendEmail = async ({ to, subject, text, html }) => {
     port: Number(process.env.SMTP_PORT || 465),
     secure: String(process.env.SMTP_SECURE || "true") !== "false",
     auth: { user, pass },
+    connectionTimeout: Number(process.env.SMTP_TIMEOUT_MS || 10000),
+    greetingTimeout: Number(process.env.SMTP_TIMEOUT_MS || 10000),
+    socketTimeout: Number(process.env.SMTP_TIMEOUT_MS || 10000),
   });
 
   return transporter.sendMail({

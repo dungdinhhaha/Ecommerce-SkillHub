@@ -3,6 +3,8 @@ const createError = require("../utils/createError");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
+const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const sendToken = (user, res, statusCode) => {
   const token = user.getSignToken();
   user.password = undefined;
@@ -122,7 +124,7 @@ exports.forgotPassword = async (req, res, next) => {
 
     const user = await User.findOne({
       $or: [
-        { email: account.toLowerCase() },
+        { email: { $regex: `^${escapeRegExp(account)}$`, $options: "i" } },
         { username: account },
       ],
     });
