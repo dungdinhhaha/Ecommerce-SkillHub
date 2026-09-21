@@ -4,10 +4,38 @@ const createError = require("../utils/createError");
 
 const MAX_UPLOAD_SIZE = 500 * 1024 * 1024;
 const MAX_UPLOAD_SIZE_LABEL = "500MB";
+const LARGE_UPLOAD_THRESHOLD = 95 * 1024 * 1024;
 
 const removeTempFile = (path) => {
   if (!path) return;
   fs.promises.unlink(path).catch(() => {});
+};
+
+const uploadToCloudinary = (filePath, fileSize) => {
+  const options = {
+    resource_type: "auto",
+    folder: "skillhub_uploads",
+    use_filename: true,
+    unique_filename: true,
+  };
+
+  if (fileSize <= LARGE_UPLOAD_THRESHOLD) {
+    return cloudinary.uploader.upload(filePath, options);
+  }
+
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_large(
+      filePath,
+      {
+        ...options,
+        chunk_size: 20 * 1024 * 1024,
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        return resolve(result);
+      }
+    );
+  });
 };
 
 exports.uploadFile = async (req, res, next) => {
@@ -29,13 +57,10 @@ exports.uploadFile = async (req, res, next) => {
       secure: true,
     });
 
-    const result = await cloudinary.uploader.upload_large(req.file.path, {
-      resource_type: "auto",
-      folder: "skillhub_uploads",
-      use_filename: true,
-      unique_filename: true,
-      chunk_size: 20 * 1024 * 1024,
-    });
+    const result = await uploadToCloudinary(req.file.path, req.file.size);
+    if (!result?.secure_url) {
+      throw createError(502, "Cloudinary đã nhận file nhưng chưa trả về link tải. Vui lòng thử lại.");
+    }
 
     res.status(201).json({
       success: true,
