@@ -138,27 +138,7 @@ const getOrderMoneyParts = (originalPrice, voucherParts) => {
 };
 
 const getCloudinaryDownloadUrl = (url) => {
-  if (!url || !process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-    return url;
-  }
-  try {
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-      secure: true,
-    });
-    const publicId = url.split("/upload/")[1]?.replace(/^v\d+\//, "")?.replace(/\.[^.]+$/, "");
-    if (!publicId) return url;
-    return cloudinary.url(publicId, {
-      sign_url: true,
-      secure: true,
-      resource_type: "auto",
-      type: "upload",
-    });
-  } catch (err) {
-    return url;
-  }
+  return url;
 };
 
 exports.getOrders = async (req, res, next) => {
