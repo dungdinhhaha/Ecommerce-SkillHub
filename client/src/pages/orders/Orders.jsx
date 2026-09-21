@@ -107,6 +107,10 @@ const Orders = () => {
     <div className="order-list">{filteredOrders.map((order) => {
       const isOpen = openOrderId === order._id;
       const deliveryResult = getDeliveryResult(order);
+      const canSellerSendDelivery = currentUser.isSeller && (
+        ["in_progress", "revision_requested"].includes(order.status)
+        || (order.status === "submitted" && !deliveryResult.files.length)
+      );
       return <article className={`order-card ${isOpen ? "open" : ""}`} key={order._id}>
       <button type="button" className="order-summary" onClick={() => setOpenOrderId(isOpen ? "" : order._id)}>
         <img className="image" src={order.gig?.cover || "/img/noavatar.png"} alt="" />
@@ -124,7 +128,7 @@ const Orders = () => {
         <div className="order-head"><div><strong>Mã đơn: {order.paymentCode}</strong><small>Được tạo: {new Date(order.createdAt).toLocaleString("vi-VN")}</small></div><span className={`status ${order.status}`}>{statusLabels[order.status] || order.status}</span></div>
         <OrderStepper status={order.status} />
         <div className="order-body"><img className="image" src={order.gig?.cover || "/img/noavatar.png"} alt="" /><div className="order-info"><h2>{order.gig?.title}</h2><p>{currentUser.isSeller ? "Người mua" : "Talent"}: {currentUser.isSeller ? order.buyer?.username : order.seller?.username}</p><p className="price">{Number(order.price).toLocaleString("vi-VN")} VND</p>{order.sepayTransactionId && <small>Mã giao dịch SePay: {order.sepayTransactionId}</small>}</div>
-          <div className="order-actions"><button onClick={() => navigate(`/orders/${order._id}`)}>Chi tiết</button><button onClick={() => handleContact(order)}>Nhắn tin</button>{currentUser.isSeller && ["in_progress", "revision_requested"].includes(order.status) && <button onClick={() => setDelivering(order)}>Gửi kết quả</button>}{!currentUser.isSeller && order.status === "submitted" && <><button onClick={() => action.mutate({ type: "complete", id: order._id })}>Xác nhận hoàn thành</button><button onClick={() => setRevising(order)}>Yêu cầu chỉnh sửa</button></>}{!currentUser.isSeller && ["in_progress", "submitted", "revision_requested", "completed"].includes(order.status) && <button className="danger" onClick={() => setDisputing(order)}>Yêu cầu hoàn tiền</button>}{!currentUser.isSeller && order.gig?.listingType === "digital_product" && <button onClick={async () => { const res = await request.get(`/gigs/order/${order._id}/download`); window.open(res.data.data.url, "_blank"); }}>Tải sản phẩm</button>}{!currentUser.isSeller && order.status === "completed" && <button onClick={() => setReviewing(order)}>Đánh giá</button>}</div>
+          <div className="order-actions"><button onClick={() => navigate(`/orders/${order._id}`)}>Chi tiết</button><button onClick={() => handleContact(order)}>Nhắn tin</button>{canSellerSendDelivery && <button onClick={() => setDelivering(order)}>{order.status === "submitted" ? "Gửi bổ sung file" : "Gửi kết quả"}</button>}{!currentUser.isSeller && order.status === "submitted" && <><button onClick={() => action.mutate({ type: "complete", id: order._id })}>Xác nhận hoàn thành</button><button onClick={() => setRevising(order)}>Yêu cầu chỉnh sửa</button></>}{!currentUser.isSeller && ["in_progress", "submitted", "revision_requested", "completed"].includes(order.status) && <button className="danger" onClick={() => setDisputing(order)}>Yêu cầu hoàn tiền</button>}{!currentUser.isSeller && order.gig?.listingType === "digital_product" && <button onClick={async () => { const res = await request.get(`/gigs/order/${order._id}/download`); window.open(res.data.data.url, "_blank"); }}>Tải sản phẩm</button>}{!currentUser.isSeller && order.status === "completed" && <button onClick={() => setReviewing(order)}>Đánh giá</button>}</div>
         </div>
         {(order.disputeReason || order.disputeFiles?.length > 0) && <div className="delivery-box dispute-box">
         <strong>Yêu cầu hoàn tiền / tranh chấp</strong>
@@ -195,7 +199,7 @@ const OrderStepper = ({ status }) => {
   </div>;
 };
 
-const UploadNoteForm = ({ title, placeholder, submitLabel, requireNote = false, isSubmitting, onCancel, onSubmit }) => {
+const UploadNoteForm = ({ title, placeholder, submitLabel, requireNote = false, requireFile = false, isSubmitting, onCancel, onSubmit }) => {
   const [note, setNote] = useState("");
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -224,7 +228,11 @@ const UploadNoteForm = ({ title, placeholder, submitLabel, requireNote = false, 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if ((requireNote && !note.trim()) || (!requireNote && !note.trim() && !files.length)) {
+    if (requireFile && !files.length) {
+      setError("Vui lòng chọn ít nhất 1 file bàn giao.");
+      return;
+    }
+    if ((requireNote && !note.trim()) || (!requireNote && !requireFile && !note.trim() && !files.length)) {
       setError(requireNote ? "Nhập nội dung cần chỉnh sửa." : "Nhập mô tả hoặc chọn ít nhất 1 file bàn giao.");
       return;
     }
@@ -235,6 +243,10 @@ const UploadNoteForm = ({ title, placeholder, submitLabel, requireNote = false, 
     try {
       const uploadedFiles = await Promise.all(files.map((file) => upload(file)));
       const validFiles = uploadedFiles.filter(Boolean);
+      if (requireFile && !validFiles.length) {
+        setError("Upload file chưa thành công, vui lòng chọn file và thử lại.");
+        return;
+      }
       onSubmit({ note: note.trim(), files: validFiles });
     } catch (err) {
       setError(err.message || "Upload file chưa thành công, kiểm tra Cloudinary rồi thử lại.");
@@ -283,6 +295,7 @@ const DeliveryForm = (props) => <UploadNoteForm
   title="Gửi kết quả cho người mua"
   placeholder="Mô tả kết quả, hướng dẫn sử dụng hoặc ghi chú bàn giao"
   submitLabel="Gửi bàn giao"
+  requireFile
   {...props}
 />;
 

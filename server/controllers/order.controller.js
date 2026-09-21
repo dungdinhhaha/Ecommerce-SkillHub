@@ -385,12 +385,18 @@ exports.submitDelivery = async (req, res, next) => {
     if (!order) return next(createError(404, "Order not found"));
     if (order.seller._id.toString() !== req.user.id.toString())
       return next(createError(403, "Only the seller can submit delivery"));
-    if (!["in_progress", "revision_requested"].includes(order.status))
+    const canRepairEmptyDelivery = order.status === "submitted" && !order.deliveryFiles?.length;
+    if (!["in_progress", "revision_requested"].includes(order.status) && !canRepairEmptyDelivery)
       return next(createError(400, "This order is not ready for delivery"));
     if (hasBlockedContact(req.body.note))
       return next(createError(400, "Không được gửi số điện thoại, email hoặc link liên hệ ngoài nền tảng"));
+    const deliveryFiles = Array.isArray(req.body.files)
+      ? req.body.files.map((file) => String(file || "").trim()).filter(Boolean)
+      : [];
+    if (!deliveryFiles.length)
+      return next(createError(400, "Vui lòng đính kèm ít nhất 1 file bàn giao trước khi gửi kết quả"));
     order.deliveryNote = req.body.note || "";
-    order.deliveryFiles = Array.isArray(req.body.files) ? req.body.files : [];
+    order.deliveryFiles = deliveryFiles;
     order.status = "submitted";
     order.deliveredAt = new Date();
     addTimeline(order, {

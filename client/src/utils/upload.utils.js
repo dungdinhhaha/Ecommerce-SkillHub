@@ -31,7 +31,11 @@ const upload = async (file) => {
 
   try {
     const res = await request.post("/upload", data);
-    return res.data.data.url;
+    const uploadedUrl = res.data?.data?.url || res.data?.url || "";
+    if (!uploadedUrl) {
+      throw new Error("Server đã nhận file nhưng chưa trả về link file. Vui lòng thử lại hoặc kiểm tra cấu hình upload.");
+    }
+    return uploadedUrl;
   } catch (err) {
     console.log(err);
     console.log(err.message);
