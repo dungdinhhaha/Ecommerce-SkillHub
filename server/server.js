@@ -97,6 +97,7 @@ app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
+    exposedHeaders: ["Content-Disposition", "Content-Length", "Content-Type"],
   })
 );
 app.use(securityHeaders);

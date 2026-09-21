@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import request from "../../utils/request.utils";
+import { downloadProtectedFile } from "../../utils/download.utils";
 import "./OrderDetail.scss";
 
 const labels = {
@@ -23,8 +24,7 @@ const OrderDetail = () => {
   });
 
   const openDeliveryFile = async (index) => {
-    const res = await request.get(`/gigs/order/${id}/delivery-files/${index}`);
-    window.open(res.data.data.url, "_blank");
+    await downloadProtectedFile(`/gigs/order/${id}/delivery-files/${index}`, `ban-giao-${index + 1}`);
   };
 
   if (isLoading) return <div className="order-detail"><div className="container"><p>Đang tải chi tiết đơn...</p></div></div>;

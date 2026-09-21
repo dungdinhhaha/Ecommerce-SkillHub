@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import request from "../../utils/request.utils";
 import upload, { MAX_UPLOAD_SIZE_LABEL, validateUploadFile } from "../../utils/upload.utils";
+import { downloadProtectedFile } from "../../utils/download.utils";
 import "./Orders.scss";
 
 const statusLabels = {
@@ -49,8 +50,7 @@ const Orders = () => {
     }
   };
   const openDeliveryFile = async (orderId, index) => {
-    const res = await request.get(`/gigs/order/${orderId}/delivery-files/${index}`);
-    window.open(res.data.data.url, "_blank");
+    await downloadProtectedFile(`/gigs/order/${orderId}/delivery-files/${index}`, `ban-giao-${index + 1}`);
   };
   if (isLoading) return <div className="orders"><div className="container"><p>Đang tải đơn hàng...</p></div></div>;
   if (isError) return <div className="orders"><div className="container"><p>Không thể tải đơn hàng.</p></div></div>;
@@ -128,7 +128,7 @@ const Orders = () => {
         <div className="order-head"><div><strong>Mã đơn: {order.paymentCode}</strong><small>Được tạo: {new Date(order.createdAt).toLocaleString("vi-VN")}</small></div><span className={`status ${order.status}`}>{statusLabels[order.status] || order.status}</span></div>
         <OrderStepper status={order.status} />
         <div className="order-body"><img className="image" src={order.gig?.cover || "/img/noavatar.png"} alt="" /><div className="order-info"><h2>{order.gig?.title}</h2><p>{currentUser.isSeller ? "Người mua" : "Talent"}: {currentUser.isSeller ? order.buyer?.username : order.seller?.username}</p><p className="price">{Number(order.price).toLocaleString("vi-VN")} VND</p>{order.sepayTransactionId && <small>Mã giao dịch SePay: {order.sepayTransactionId}</small>}</div>
-          <div className="order-actions"><button onClick={() => navigate(`/orders/${order._id}`)}>Chi tiết</button><button onClick={() => handleContact(order)}>Nhắn tin</button>{canSellerSendDelivery && <button onClick={() => setDelivering(order)}>{order.status === "submitted" ? "Gửi bổ sung file" : "Gửi kết quả"}</button>}{!currentUser.isSeller && order.status === "submitted" && <><button onClick={() => action.mutate({ type: "complete", id: order._id })}>Xác nhận hoàn thành</button><button onClick={() => setRevising(order)}>Yêu cầu chỉnh sửa</button></>}{!currentUser.isSeller && ["in_progress", "submitted", "revision_requested", "completed"].includes(order.status) && <button className="danger" onClick={() => setDisputing(order)}>Yêu cầu hoàn tiền</button>}{!currentUser.isSeller && order.gig?.listingType === "digital_product" && <button onClick={async () => { const res = await request.get(`/gigs/order/${order._id}/download`); window.open(res.data.data.url, "_blank"); }}>Tải sản phẩm</button>}{!currentUser.isSeller && order.status === "completed" && <button onClick={() => setReviewing(order)}>Đánh giá</button>}</div>
+          <div className="order-actions"><button onClick={() => navigate(`/orders/${order._id}`)}>Chi tiết</button><button onClick={() => handleContact(order)}>Nhắn tin</button>{canSellerSendDelivery && <button onClick={() => setDelivering(order)}>{order.status === "submitted" ? "Gửi bổ sung file" : "Gửi kết quả"}</button>}{!currentUser.isSeller && order.status === "submitted" && <><button onClick={() => action.mutate({ type: "complete", id: order._id })}>Xác nhận hoàn thành</button><button onClick={() => setRevising(order)}>Yêu cầu chỉnh sửa</button></>}{!currentUser.isSeller && ["in_progress", "submitted", "revision_requested", "completed"].includes(order.status) && <button className="danger" onClick={() => setDisputing(order)}>Yêu cầu hoàn tiền</button>}{!currentUser.isSeller && order.gig?.listingType === "digital_product" && <button onClick={() => downloadProtectedFile(`/gigs/order/${order._id}/download`, order.gig?.title || "san-pham")}>Tải sản phẩm</button>}{!currentUser.isSeller && order.status === "completed" && <button onClick={() => setReviewing(order)}>Đánh giá</button>}</div>
         </div>
         {(order.disputeReason || order.disputeFiles?.length > 0) && <div className="delivery-box dispute-box">
         <strong>Yêu cầu hoàn tiền / tranh chấp</strong>
@@ -148,7 +148,7 @@ const Orders = () => {
         {deliveryResult.note && <p>{deliveryResult.note}</p>}
         {deliveryResult.files.length > 0 ? <div className="delivery-files">{deliveryResult.files.map((fileUrl, index) => <button type="button" onClick={() => openDeliveryFile(order._id, index)} key={`${fileUrl}-${index}`}>Tải file bàn giao {index + 1}</button>)}</div> : <small>Đã ghi nhận bàn giao, chưa có file đính kèm.</small>}
         </div>}
-        {order.timeline?.length > 0 && <Timeline items={order.timeline} />}
+        {order.timeline?.length > 0 && <Timeline items={order.timeline} orderId={order._id} />}
         {delivering?._id === order._id && <DeliveryForm
         isSubmitting={action.isLoading}
         onCancel={() => setDelivering(null)}
@@ -368,7 +368,7 @@ const RefundForm = ({ order, isSubmitting, onCancel, onSubmit }) => {
   </form>;
 };
 
-const Timeline = ({ items }) => <div className="order-timeline">
+const Timeline = ({ items, orderId }) => <div className="order-timeline">
   <strong>Lịch sử đơn hàng</strong>
   {[...items].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map((item, index) => <div className="timeline-item" key={`${item.type}-${item.createdAt}-${index}`}>
     <span className="dot" />
@@ -376,7 +376,7 @@ const Timeline = ({ items }) => <div className="order-timeline">
       <p>{item.title}</p>
       <small>{new Date(item.createdAt).toLocaleString("vi-VN")}</small>
       {item.note && <em>{item.note}</em>}
-      {item.files?.length > 0 && <div className="delivery-files">{item.files.map((fileUrl, fileIndex) => <a href={fileUrl} target="_blank" rel="noreferrer" key={fileUrl}>File {fileIndex + 1}</a>)}</div>}
+      {item.type === "delivered" && item.files?.length > 0 && <div className="delivery-files">{item.files.map((fileUrl, fileIndex) => <button type="button" onClick={() => downloadProtectedFile(`/gigs/order/${orderId}/delivery-files/${fileIndex}`, `ban-giao-${fileIndex + 1}`)} key={`${fileUrl}-${fileIndex}`}>Tải file {fileIndex + 1}</button>)}</div>}
     </div>
   </div>)}
 </div>;

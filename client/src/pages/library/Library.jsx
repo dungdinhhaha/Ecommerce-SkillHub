@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import request from "../../utils/request.utils";
+import { downloadProtectedFile } from "../../utils/download.utils";
 import "./Library.scss";
 
 const money = (value) => Number(value || 0).toLocaleString("vi-VN");
@@ -12,8 +13,7 @@ const Library = () => {
   });
 
   const download = async (orderId) => {
-    const res = await request.get(`/gigs/order/${orderId}/download`);
-    window.open(res.data.data.url, "_blank");
+    await downloadProtectedFile(`/gigs/order/${orderId}/download`, "san-pham-so");
   };
 
   if (isLoading) return <div className="library"><div className="container"><p>Đang tải thư viện...</p></div></div>;

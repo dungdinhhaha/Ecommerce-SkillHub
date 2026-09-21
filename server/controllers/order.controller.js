@@ -5,7 +5,7 @@ const Refund = require("../models/refund.model");
 const Voucher = require("../models/voucher.model");
 const createError = require("../utils/createError");
 const crypto = require("crypto");
-const { v2: cloudinary } = require("cloudinary");
+const { Readable } = require("stream");
 const { hasBlockedContact } = require("../utils/contentGuard");
 
 const getPaymentCode = () => `DH${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
@@ -137,8 +137,39 @@ const getOrderMoneyParts = (originalPrice, voucherParts) => {
   };
 };
 
-const getCloudinaryDownloadUrl = (url) => {
-  return url;
+const getFileNameFromUrl = (url, fallback = "skillhub-file") => {
+  try {
+    const parsedUrl = new URL(url);
+    const lastSegment = decodeURIComponent(parsedUrl.pathname.split("/").filter(Boolean).pop() || "");
+    return lastSegment || fallback;
+  } catch (err) {
+    return fallback;
+  }
+};
+
+const getSafeAsciiFileName = (fileName) =>
+  String(fileName || "skillhub-file").replace(/[^\w.\-]+/g, "_").slice(0, 160) || "skillhub-file";
+
+const streamProtectedFile = async (res, fileUrl, fileName) => {
+  if (!fileUrl) throw createError(404, "File not found");
+  const response = await fetch(fileUrl);
+  if (!response.ok) {
+    const cloudinaryError = response.headers.get("x-cld-error");
+    throw createError(response.status, cloudinaryError
+      ? `Không thể tải file từ kho lưu trữ: ${cloudinaryError}`
+      : "Không thể tải file từ kho lưu trữ");
+  }
+  const resolvedFileName = fileName || getFileNameFromUrl(fileUrl);
+  res.setHeader("Content-Type", response.headers.get("content-type") || "application/octet-stream");
+  const contentLength = response.headers.get("content-length");
+  if (contentLength) res.setHeader("Content-Length", contentLength);
+  res.setHeader("Cache-Control", "private, no-store");
+  res.setHeader("Content-Disposition", `attachment; filename="${getSafeAsciiFileName(resolvedFileName)}"; filename*=UTF-8''${encodeURIComponent(resolvedFileName)}`);
+  if (response.body) {
+    return Readable.fromWeb(response.body).pipe(res);
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return res.end(buffer);
 };
 
 exports.getOrders = async (req, res, next) => {
@@ -553,7 +584,7 @@ exports.downloadDigitalProduct = async (req, res, next) => {
     if (!order) return next(createError(404, "Paid order not found"));
     if (order.gig.listingType !== "digital_product")
       return next(createError(400, "This order is not a digital product"));
-    res.status(200).json({ success: true, data: { url: getCloudinaryDownloadUrl(order.gig.digitalFileUrl), fileName: order.gig.digitalFileName } });
+    await streamProtectedFile(res, order.gig.digitalFileUrl, order.gig.digitalFileName || `${order.gig.title || "skillhub-product"}.zip`);
   } catch (err) { next(err); }
 };
 
@@ -567,7 +598,7 @@ exports.getDeliveryFile = async (req, res, next) => {
     if (!order) return next(createError(404, "Order not found"));
     const fileUrl = order.deliveryFiles[Number(req.params.index)];
     if (!fileUrl) return next(createError(404, "File not found"));
-    res.status(200).json({ success: true, data: { url: getCloudinaryDownloadUrl(fileUrl) } });
+    await streamProtectedFile(res, fileUrl);
   } catch (err) { next(err); }
 };
 
