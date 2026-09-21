@@ -9,7 +9,7 @@ const MAX_UPLOAD_SIZE = 500 * 1024 * 1024;
 const BLOCKED_EXTENSIONS = [
   ".exe", ".bat", ".cmd", ".com", ".scr", ".pif", ".msi", ".dll",
   ".ps1", ".vbs", ".js", ".jse", ".wsf", ".sh", ".jar", ".apk",
-  ".dmg", ".deb", ".rpm",
+  ".dmg", ".deb", ".rpm", ".rar", ".7z",
 ];
 
 const storage = multer.diskStorage({
@@ -26,6 +26,9 @@ const uploader = multer({
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname || "").toLowerCase();
     if (BLOCKED_EXTENSIONS.includes(ext)) {
+      if ([".rar", ".7z"].includes(ext)) {
+        return cb(createError(400, `File ${file.originalname} có định dạng ${ext} không tải ổn định qua Cloudinary. Vui lòng nén lại thành .zip trước khi gửi.`));
+      }
       return cb(createError(400, `File ${file.originalname} có định dạng ${ext} rủi ro cao. Vui lòng nén thành .zip hoặc dùng định dạng tài liệu an toàn.`));
     }
     cb(null, true);

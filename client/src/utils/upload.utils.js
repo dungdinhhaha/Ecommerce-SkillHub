@@ -3,7 +3,7 @@ import request from "./request.utils";
 const BLOCKED_EXTENSIONS = [
   ".exe", ".bat", ".cmd", ".com", ".scr", ".pif", ".msi", ".dll",
   ".ps1", ".vbs", ".js", ".jse", ".wsf", ".sh", ".jar", ".apk",
-  ".dmg", ".deb", ".rpm",
+  ".dmg", ".deb", ".rpm", ".rar", ".7z",
 ];
 
 export const MAX_UPLOAD_SIZE = 500 * 1024 * 1024;
@@ -15,6 +15,9 @@ export const validateUploadFile = (file) => {
   const lowerName = name.toLowerCase();
   const blocked = BLOCKED_EXTENSIONS.find((ext) => lowerName.endsWith(ext));
   if (blocked) {
+    if ([".rar", ".7z"].includes(blocked)) {
+      return `File ${name} có định dạng ${blocked} không tải ổn định qua Cloudinary. Vui lòng nén lại thành .zip trước khi gửi.`;
+    }
     return `File ${name} có định dạng ${blocked} rủi ro cao. Vui lòng đóng gói tài nguyên hợp pháp trong .zip/.pdf/.docx/.pptx hoặc liên hệ admin để kiểm tra.`;
   }
   if (file.size > MAX_UPLOAD_SIZE) {
