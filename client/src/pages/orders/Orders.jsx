@@ -242,9 +242,9 @@ const UploadNoteForm = ({ title, placeholder, submitLabel, requireNote = false, 
 
     try {
       const uploadedFiles = await Promise.all(files.map((file) => upload(file)));
-      const validFiles = uploadedFiles.filter(Boolean);
-      if (requireFile && !validFiles.length) {
-        setError("Upload file chưa thành công, vui lòng chọn file và thử lại.");
+      const validFiles = uploadedFiles.map((url) => String(url || "").trim()).filter(Boolean);
+      if (requireFile && validFiles.length !== files.length) {
+        setError(`Upload chưa đủ file: đã nhận ${validFiles.length}/${files.length} link file. Vui lòng thử lại.`);
         return;
       }
       onSubmit({ note: note.trim(), files: validFiles });

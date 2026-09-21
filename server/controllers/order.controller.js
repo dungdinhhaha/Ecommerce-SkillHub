@@ -379,6 +379,23 @@ exports.handleSepayWebhook = async (req, res, next) => {
 const getOrderForUser = async (id, userId) =>
   Order.findById(id).populate("gig").populate("seller", "username img").populate("buyer", "username img");
 
+const normalizeDeliveryFiles = (payload) => {
+  const rawFiles = Array.isArray(payload?.files)
+    ? payload.files
+    : Array.isArray(payload?.deliveryFiles)
+      ? payload.deliveryFiles
+      : payload?.file || payload?.fileUrl || payload?.url
+        ? [payload.file || payload.fileUrl || payload.url]
+        : [];
+  return rawFiles
+    .map((file) => {
+      if (typeof file === "string") return file.trim();
+      if (file && typeof file === "object") return String(file.url || file.secure_url || file.href || "").trim();
+      return "";
+    })
+    .filter(Boolean);
+};
+
 exports.submitDelivery = async (req, res, next) => {
   try {
     const order = await getOrderForUser(req.params.orderId, req.user.id);
@@ -390,9 +407,7 @@ exports.submitDelivery = async (req, res, next) => {
       return next(createError(400, "This order is not ready for delivery"));
     if (hasBlockedContact(req.body.note))
       return next(createError(400, "Không được gửi số điện thoại, email hoặc link liên hệ ngoài nền tảng"));
-    const deliveryFiles = Array.isArray(req.body.files)
-      ? req.body.files.map((file) => String(file || "").trim()).filter(Boolean)
-      : [];
+    const deliveryFiles = normalizeDeliveryFiles(req.body);
     if (!deliveryFiles.length)
       return next(createError(400, "Vui lòng đính kèm ít nhất 1 file bàn giao trước khi gửi kết quả"));
     order.deliveryNote = req.body.note || "";
